@@ -1,0 +1,41 @@
+body {
+  color: #999;
+  font: 14px/1.5em "Lucida Grande", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-width: 520px;
+  margin: 0px;
+  padding: 0px;
+}
+
+a:link, a:visited {
+  color: #3b5998;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover, a:active {
+  text-decoration: underline;
+}
+
+h1 {
+  color: #656565;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 20px;
+  font-weight: normal;
+  border-bottom: 2px solid #e9e9e9;
+}
+
+p {
+  color: #25383C;
+  font-size: 12px;
+}
+
+p.title {
+  font-weight: bold;
+  margin-top: 12px;
+}
+
+ol, ul, li {
+  color: #25383C;
+  font-size: 12px;
+}

@@ -1,0 +1,165 @@
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(../../static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Network</h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/?code={{code}}">Home</a></span>
+        <span><a href="/profile?code={{code}}">Profile</a></span>
+        <span><a href="/network/{{uid}}?code={{code}}">Network</a></span>
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+    
+    <section id="normalsection" class="clearfix">
+      {% if not code == None %}
+        <h2>Network for user: {{uid}}<br/>
+        (generate network file: <a href="/network.gdf?uid={{uid}}&code={{ code }}">GDF</a> or <a href="/network.graphml?uid={{uid}}&code={{ code }}">graphml</a>)<br/>
+        <a href="#" onclick="post_wall()" class="facebook-button">
+          <span class="plus">Post your network data on your profile</span>
+        </a></h2>
+      {% else %}
+        <h2>Network for user: {{uid}}</h2>
+      {% endif %}
+    </section>
+   
+    <section id="normalsection" class="clearfix">
+      <p class="title">The network has the following characteristics:</p>
+      {% if not nodes == None and not edges == None %}
+      <p>Network nodes number: {{nodes|length}} <span id="friendnodes"></span></p>
+      <p>Network edges number: {{edges|length}} <span id="friendedges"></span></p>
+      {% if not code == None and friends != None and friends|length > 0  %}
+      <p>&nbsp;</p>
+      
+      <p><a id="comparelink" href="#">Compare your network with one of your friends</a></p>
+      
+      <div id ="comparediv">
+        <p>Select the friend from the dropdown list:
+        <select id="friend" name="friend">
+          <option value=""></option>
+          {% for friend in friends %}
+          <option value="{{friend.uid}}">{{friend.name}}</option>
+          {% endfor %}
+        </select> <span id="comparemessage"/></p>
+      </div>
+    
+      <script language="javascript">
+      <!--
+        $('#friend').change(function() {
+          if ($('#friend option:selected').val() == "") {
+            $('#comparemessage').text('');
+            $('#friendnodes').text('');
+            $('#friendedges').text('');
+            $('#friendelite').text('');
+          }
+          else {
+            $('#comparemessage').text('Retrieving ' + $('#friend option:selected').text() + '\'s network...');
+            $('#friendnodes').text('');
+            $('#friendedges').text('');
+            $('#friendelite').text('');
+            
+            $.ajax({
+	          type : 'POST',
+	          url : '/network/{{uid}}',
+	          dataType : 'json',
+	          data: {
+	             code: '{{code}}',
+	             frienduid: $('#friend option:selected').val(),
+	             action: 'getFriendValues'
+	          },
+	          success : function(data){
+	            $('#comparemessage').text('');
+	            if (data.nodes == null || data.edges == null) {
+	              $('#comparemessage').text($('#friend option:selected').text() + " has not computed network information. Tell him/her to do it immediately!");
+	            }
+	            else {
+	              $('#friendnodes').text($('#friend option:selected').text() + '\'s nodes: ' + data.nodes);
+	              $('#friendedges').text($('#friend option:selected').text() + '\'s edges: ' + data.edges);
+	              if (data.rank >= 0) {
+	                if (data.rank == 0) {
+	                  $('#friendelite').text("You do not appear in " + $('#friend option:selected').text() + "'s elite table!");
+	                } else {
+	                  $('#friendelite').text("You are the number " + data.rank + " in " + $('#friend option:selected').text() + "'s elite table!");
+	                }
+	              }
+                }
+	          },
+	          error : function(XMLHttpRequest, textStatus, errorThrown) {
+	            $('#comparemessage').text("Error while retrieving friends index value.");
+	          }
+	        });
+          }
+        });
+      
+        $('#comparelink').click(function() {
+          if ($('#comparediv').is(':hidden')) {
+    	    $('#comparediv').show('slow');
+          } else {
+          	$('#comparediv').hide('fast');
+          }
+          return false;
+        });
+      // -->    	
+      </script>
+      {% endif %}
+        {% if not league == None %}
+        <p>&nbsp;</p>
+        <p class="title">Elite group of the network:<span id="friendelite"></span>
+          {% if not hiddenleague %}
+          <table id="podium">
+            <tr class="podiumimgrow">
+              <td rowspan="2" class="picture"><a href="http://www.facebook.com/profile.php?id={{league.1.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.1.0}}/picture?type=normal" alt="{{league.1.1}}" border="0" /></a></td>
+              <td class="picture"><a href="http://www.facebook.com/profile.php?id={{league.0.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.0.0}}/picture?type=normal" alt="{{league.0.1}}" border="0" /></a></td>
+              <td rowspan="3" class="picture"><a href="http://www.facebook.com/profile.php?id={{league.2.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.2.0}}/picture?type=normal" alt="{{league.2.1}}" border="0" /></a></td>
+            </tr>
+            <tr class="podiumrow"><td rowspan="3" class="pavement"><strong>1</strong></td></tr>
+            <tr class="podiumrow"><td rowspan="2" class="pavement">2</td></tr>
+            <tr class="podiumrow"><td class="pavement">3</td></tr>
+          </table>
+          {% endif %}
+        
+          <table id="values" class="longvalues">
+            <thead id="valueshead"><td>Ranking:</td><td>Name:</td><td>Degree:</td><td>Closeness:</td><td>Betweenness:</td></thead>
+            {% for row in league %}
+            <tr><td>{{forloop.counter}}</td><td id="text">{% if not hiddenleague %}<a href="http://www.facebook.com/profile.php?id={{row.0}}" target="_blank">{% endif %}{{row.1}}{% if not hiddenleague %}</a>{% endif %}</td><td id="value">{{row.2}}</td><td id="value">{{row.3|formatfloat:'6'}}</td><td id="value">{{row.4|formatfloat:'6'}}</td></tr>
+            {% endfor %}
+          </table>
+	    </p>
+	    {% else %}
+	    <span id="friendelite" style="visiblity: hidden"></span>
+	    {% endif %}
+	  {% else %}
+	  <p>At least one index value must be calculated in order to have the network computed and visible here.</p>
+      {% endif %}
+    </section>
+    
+    <script type="text/javascript">
+     <!--
+       function post_wall() {
+    	   if (window.confirm("Do you really want to post result to your wall?")) {
+	    	   $.ajax({
+	               type : 'POST',
+	               url : '/postwall',
+	               dataType : 'json',
+	               data : {
+	                  code : '{{code}}',
+	                  msgtype : 'network',
+	            	  nodes : '{{nodes|length}}',
+	                  edges : '{{edges|length}}',
+	                  league : '{{league}}',
+	               },
+	               success : function(data){ },
+	               error : function(XMLHttpRequest, textStatus, errorThrown) {
+	                  window.alert("Error while posting to your wall.")
+	               }
+	            });
+    	   }
+    	   
+    	   return false;
+       }       
+     // -->
+    </script>

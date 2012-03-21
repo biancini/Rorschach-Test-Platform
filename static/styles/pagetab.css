@@ -1,0 +1,57 @@
+body {
+  color: #999;
+  font: 14px/1.5em "Lucida Grande", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-width: 520px;
+  margin: 0px;
+  padding: 0px;
+}
+
+a:link, a:visited {
+  color: #3b5998;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover, a:active {
+  text-decoration: underline;
+}
+
+h1 {
+  color: #656565;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 20px;
+  font-weight: normal;
+  border-bottom: 2px solid #e9e9e9;
+}
+
+h2 {
+  color: #656565;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+p {
+  color: black;
+  font-size: 12px;
+}
+
+p.title {
+  font-weight: bold;
+  margin-top: 12px;
+}
+
+p.image {
+	text-align: center;
+}
+
+img {
+	border: 1px solid black;
+}
+
+img.fbpicture {
+	float: left;
+	margin-right: 0.5em;
+}

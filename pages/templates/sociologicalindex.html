@@ -1,0 +1,406 @@
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(../../static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>"{{indexname|title}}" Sociological Index</h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/?code={{code}}">Home</a></span>
+        <span><a href="/profile?code={{code}}">Profile</a></span>
+        <span><a href="/index/{{uid}}/{{indexname}}?code={{code}}">{{indexname|title}} Index</a></span>
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+  
+    <section id="normalsection" class="clearfix">
+      {% if not code == None %}
+        <h2>Index computed for user: {{uid}}<br/>
+        <a href="#" onclick="post_wall('{{indexname}}', '{{value}}')" class="facebook-button">
+          <span class="plus">Post this index value on your profile</span>
+        </a></h2>
+      {% else %}
+        <h2>Index computed for user: {{uid}}</h2>
+      {% endif %}
+    </section>
+    
+    <section id="normalsection" class="clearfix">
+      <p class="title">Description of the "{{indexname}}" sociological index:</p>
+      <p><i>{{description}}</i></p>
+      {% if not conf.INDEX_FORMULAS|keyfromdict:indexname == None %}
+      <p style="text-align: center">
+      {% for formula in conf.INDEX_FORMULAS|keyfromdict:indexname %}
+      {% if formula != '' %}
+      <img alt="formula" src="http://chart.googleapis.com/chart?cht=tx&chl={{formula}}"/><br/>
+      {% endif %}
+      {% endfor %}
+      </p>
+      {% else %}
+      <p>&nbsp;</p>
+      {% endif %}
+      <p>Computed value: {{value}} <span id="friendvalue"></span></p>
+      
+      {% if not code == None and friends != None and friends|length > 0  %}
+      <p>&nbsp;</p>
+      <p><a id="comparelink" href="#">Compare your index value with one of your friends</a></p>
+      
+      <div id ="comparediv">
+        <p>Select the friend from the dropdown list:
+        <select id="friend" name="friend">
+          <option value=""></option>
+          {% for friend in friends %}
+          <option value="{{friend.uid}}">{{friend.name}}</option>
+          {% endfor %}
+        </select> <span id="comparemessage"/></p>
+      </div>
+    
+      <script language="javascript">
+      <!--
+        $('#friend').change(function() {
+          if ($('#friend option:selected').val() == "") {
+            $('#comparemessage').text('');
+            $('#friendvalue').text('');
+            if (chartType == 'scatter') drawChart(rowCurUser, 1);
+	        else drawChart(rowCurUserG, 1);
+          }
+          else {
+            $('#comparemessage').text('Retrieving ' + $('#friend option:selected').text() + '\'s index...');
+            $('#friendvalue').text('');
+            
+            $.ajax({
+	          type : 'POST',
+	          url : '/index/{{uid}}/{{indexname}}',
+	          dataType : 'json',
+	          data: {
+	             code : '{{code}}',
+	             frienduid: $('#friend option:selected').val(),
+	             {% if not nodevalues == None %}
+	             myvalues: "{% autoescape off %}{{nodevalues}}{% endautoescape %}",
+	             myvaluesG: "{% autoescape off %}{{nodegaussian}}{% endautoescape %}",
+	             {% endif %}
+	             {% if not edgevalues == None %}
+	             myvalues: "{% autoescape off %}{{edgevalues}}{% endautoescape %}",
+	             myvaluesG: "{% autoescape off %}{{edgegaussian}}{% endautoescape %}",
+	             {% endif %}
+	             action: 'getFriendValues', 
+	          },
+	          success : function(data){
+	            $('#comparemessage').text('');
+	            if (data.value == null) {
+	              $('#comparemessage').text($('#friend option:selected').text() + " has not computed the \"{{indexname}}\" index. Tell him/her to do it immediately!");
+	              if (chartType == 'scatter') drawChart(rowCurUser, 1);
+	              else drawChart(rowCurUserG, 1);
+	            }
+	            else {
+	              $('#friendvalue').text($('#friend option:selected').text() + '\'s value: ' + data.value);
+	            
+	              {% if not nodevalues == None %}
+	           	  eval('newvals = ' + data.nodevalues + ';');
+	           	  eval('newvalsG = ' + data.nodegaussian + ';');  
+	              {% endif %}
+	              {% if not edgevalues == None %}
+	              eval('newvals = ' + data.edgevalues + ';');
+	              eval('newvalsG = ' + data.edgegaussian + ';');
+	              {% endif %}
+	            
+	              rowCurFriend = newvals;
+	              rowCurFriendG = newvalsG;
+	              
+	              if (chartType == 'scatter') drawChart(rowCurFriend, 2);
+	        	  else drawChart(rowCurFriendG, 2);
+                }
+	          },
+	          error : function(XMLHttpRequest, textStatus, errorThrown) {
+	            $('#comparemessage').text("Error while retrieving friends index value.");
+	            if (chartType == 'scatter') drawChart(rowCurUser, 1);
+	        	else drawChart(rowCurUserG, 1);
+	          }
+	        });
+          }
+        });
+      
+        $('#comparelink').click(function() {
+          if ($('#comparediv').is(':hidden')) {
+    	    $('#comparediv').show('slow');
+          } else {
+          	$('#comparediv').hide('fast');
+          }
+          return false;
+        });
+      // -->    	
+      </script>
+      {% endif %}
+    
+      {% if not nodevalues == None %}
+      <p><a id="nodeslink" href="#">Computed values per node</a></p>
+    
+      <div id ="nodevalues">
+        <table id="values" class="longvalues">
+          <thead id="valueshead"><td>Bucket:</td><td># Nodes:</td></thead>
+          {% for bucket in nodevalues %}
+          <tr><td id="value">{{bucket.0}}</td><td id="value">{{bucket.1}}</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+    
+      <script language="javascript">
+      <!--
+        $('#nodeslink').click(function() {
+          if ($('#nodevalues').is(':hidden')) {
+    	    $('#nodevalues').show('slow');
+          } else {
+          	$('#nodevalues').hide('fast');
+          }
+          return false;
+        });
+      // -->    	
+      </script>
+      {% endif %}
+      
+      {% if not edgevalues == None %}
+      <p><a id="edgeslink" href="#">Computed values per edge</a></p>
+      <div id ="edgevalues">
+        <table id="values" class="longvalues">
+          <thead id="valueshead"><td>Bucket:</td><td># Edges:</td></thead>
+          {% for bucket in edgevalues %}
+          <tr><td id="value">{{bucket.0}}</td><td id="value">{{bucket.1}}</td></tr>
+          {% endfor %}
+         </table>
+        </table>
+      </div>
+    
+      <script language="javascript">
+      <!--
+        $('#edgeslink').click(function() {
+          if ($('#edgevalues').is(':hidden')) {
+    	    $('#edgevalues').show('slow');
+          } else {
+          	$('#edgevalues').hide('fast');
+          }
+          return false;
+        });
+      // -->    	
+      </script>
+      {% endif %}
+    
+      {% if not nodevalues == None %}
+        <p>Graph of distribution for the node values of this index: <a href="#" id="chartscatter" class="disabled">show scatter chart</a>, <a href="#" id="chartgaussian">show gaussian chart</a>.</p>
+        <div id="chart_nodes_div"></div>
+        <script type="text/javascript">
+        <!--
+          var rowCurUser = {% autoescape off %}{{nodevalues}}{% endautoescape %};
+          var rowCurFriend;
+          var rowCurUserG = {% autoescape off %}{{nodegaussian}}{% endautoescape %};
+          var rowCurFriendG;
+          var chartType = 'scatter';
+          
+          google.load("visualization", "1", {packages:["corechart"]});
+          google.setOnLoadCallback(drawChartAlone);
+          
+          $('#chartscatter').click(function() {
+            $('#chartscatter').addClass('disabled');
+            $('#chartgaussian').removeClass('disabled');
+          	chartType = 'scatter';
+          	
+          	{% if not code == None and friends != None and friends|length > 0  %}
+          	if ($('#friend option:selected').val() == "") drawChart(rowCurUser, 1);
+          	else drawChart(rowCurFriend, 2);
+          	{% else %}
+          	drawChart(rowCurUser, 1);
+          	{% endif %}
+          });
+          
+          $('#chartgaussian').click(function() {
+            $('#chartscatter').removeClass('disabled');
+            $('#chartgaussian').addClass('disabled');
+          	chartType = 'gaussian';
+          	
+          	{% if not code == None and friends != None and friends|length > 0  %}
+          	if ($('#friend option:selected').val() == "") drawChart(rowCurUserG, 1);
+          	else drawChart(rowCurFriendG, 2);
+          	{% else %}
+          	drawChart(rowCurUserG, 1);
+          	{% endif %}
+          });
+          
+          function drawChartAlone() {
+          	chartType = 'scatter';
+          	drawChart(rowCurUser, 1);
+          }
+          
+          function drawChart(rowFriend, numUsers) {
+            if (chartType == 'scatter') {
+              var data = new google.visualization.DataTable();
+              data.addColumn('number', 'Bucket');
+              data.addColumn('number', '# Nodes');
+            
+              if (numUsers == 2) data.addColumn('number', '# Nodes Friend');
+              data.addRows(rowFriend);
+
+              var options = {
+                width: 600, height: 400,
+                title: 'Node distribution (over {{nodevalues|length}} buckets)',
+                hAxis: {title: 'Bucket'},
+                vAxis: {title: '# Nodes', logScale: true, format:'#'},
+                legend: 'none',
+              };
+
+              var chart = new google.visualization.ScatterChart(document.getElementById('chart_nodes_div'));
+              chart.draw(data, options);
+            }
+            else if (chartType == 'gaussian') {
+              var data = new google.visualization.DataTable();
+              data.addColumn('string', 'Bucket');
+              data.addColumn('number', '# Nodes');
+              data.addColumn('number', 'Gaussian');
+              
+              if (numUsers == 2) {
+                data.addColumn('number', '# Nodes Friend');
+                data.addColumn('number', 'Gaussian Friend');
+              }
+              
+              data.addRows(rowFriend);
+              
+              var options = {
+                title: 'Node gaussian (over {{nodevalues|length}} buckets)',
+            	width: 600, height: 400,
+            	hAxis: {title: 'Bucket'},
+            	vAxis: {title: '# Nodes', format:'#' },
+            	seriesType: "bars",
+            	series: {1: {type: 'area'}, 3: {type: 'area'}},
+            	legend: 'none',
+               };
+              
+               var chart = new google.visualization.ComboChart(document.getElementById('chart_nodes_div'));
+               chart.draw(data, options);
+            }
+          }
+        // -->
+        </script>
+      {% endif %}
+    
+      {% if not edgevalues == None %}
+        <p>Graph of distribution for the node values of this index: <a href="#" id="chartscatter" class="disabled">show scatter chart</a>, <a href="#" id="chartgaussian">show gaussian chart</a>.</p>
+        <div id="chart_edges_div"></div>
+        <script type="text/javascript">
+        <!--
+          var rowCurUser = {% autoescape off %}{{edgevalues}}{% endautoescape %};
+          var rowCurFriend;
+          var rowCurUserG = {% autoescape off %}{{edgegaussian}}{% endautoescape %};
+          var rowCurFriendG;
+          var chartType = 'scatter';
+          
+          google.load("visualization", "1", {packages:["corechart"]});
+          google.setOnLoadCallback(drawChartAlone);
+          
+          $('#chartscatter').click(function() {
+            $('#chartscatter').addClass('disabled');
+            $('#chartgaussian').removeClass('disabled');
+            
+            chartType = 'scatter';
+            {% if not code == None and friends != None and friends|length > 0  %}
+          	if ($('#friend option:selected').val() == "") drawChart(rowCurUser, 1);
+          	else drawChart(rowCurFriend, 2);
+          	{% else %}
+          	drawChart(rowCurUser, 1);
+          	{% endif %}
+          });
+          
+          $('#chartgaussian').click(function() {
+            $('#chartscatter').removeClass('disabled');
+            $('#chartgaussian').addClass('disabled');
+            
+            chartType = 'gaussian';
+          	{% if not code == None and friends != None and friends|length > 0  %}
+          	if ($('#friend option:selected').val() == "") drawChart(rowCurUserG, 1);
+          	else drawChart(rowCurFriendG, 2);
+          	{% else %}
+          	drawChart(rowCurUserG, 1);
+          	{% endif %}
+          });
+          
+          function drawChartAlone() {
+            $('#chartscatter').addClass('disabled');
+            chartType = 'scatter';
+          	drawChart(rowCurUser, 1);
+          }
+          
+          function drawChart(rowFriend, numUsers) {
+            if (chartType == 'scatter') {
+              var data = new google.visualization.DataTable();
+              data.addColumn('number', 'Bucket');
+              data.addColumn('number', '# Edges');
+            
+              if (numUsers == 2) data.addColumn('number', '# Edges Friend');
+              data.addRows(rowFriend);
+
+              var options = {
+                width: 600, height: 400,
+                title: 'Edge distribution (over {{edgevalues|length}} buckets)',
+                hAxis: {title: 'Bucket'},
+                vAxis: {title: '# Edges', logScale: true, format:'#'},
+                legend: 'none',
+              };
+ 
+              var chart = new google.visualization.ScatterChart(document.getElementById('chart_edges_div'));
+              chart.draw(data, options);
+            }
+            else if (chartType == 'gaussian') {
+              var data = new google.visualization.DataTable();
+              data.addColumn('string', 'Bucket');
+              data.addColumn('number', '# Edges');
+              data.addColumn('number', 'Gaussian');
+              
+              if (numUsers == 2) {
+                data.addColumn('number', '# Edges Friend');
+                data.addColumn('number', 'Gaussian Friend');
+              }
+              
+              data.addRows(rowFriend);
+              
+              var options = {
+                title: 'Edge gaussian (over {{edgevalues|length}} buckets)',
+            	width: 600, height: 400,
+            	hAxis: {title: 'Bucket'},
+            	vAxis: {title: '# Edges', format:'#' },
+            	seriesType: "bars",
+            	series: {1: {type: 'area'}, 3: {type: 'area'}},
+            	legend: 'none',
+               };
+            	  
+               var chart = new google.visualization.ComboChart(document.getElementById('chart_edges_div'));
+               chart.draw(data, options);
+            }
+          }
+        // -->
+        </script>
+      {% endif %}
+    </section>
+    
+    <script type="text/javascript">
+     <!--
+       function post_wall(indexname, value) {
+    	   if (window.confirm("Do you really want to post result to your wall?")) {
+	    	   $.ajax({
+	               type : 'POST',
+	               url : '/postwall',
+	               dataType : 'json',
+	               data: {
+	                  code : '{{code}}',
+	                  msgtype : 'index',
+	            	  indexname : indexname,
+	                  value : value,
+	               },
+	               success : function(data){ },
+	               error : function(XMLHttpRequest, textStatus, errorThrown) {
+	                  window.alert("Error while posting to your wall.");
+	               }
+	            });
+    	   }
+    	   
+    	   return false;
+       }       
+     // -->
+    </script>

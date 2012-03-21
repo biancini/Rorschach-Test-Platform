@@ -1,0 +1,151 @@
+#testForm label {
+    display: block;
+    color: #25383C;
+    line-height: 1.1em;
+    font-style: italic;
+}
+
+#testForm label strong {
+    font-weight: bold;
+    font-style: normal;
+}
+
+#testForm input {
+    width: 220px;
+    padding: 4px;
+    color: #25383C;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 11px;
+    border: 1px solid #cecece;
+    margin-right: 20px;
+}
+
+#testForm input.checkbox {
+	width: 40px;
+	margin-right: 0px;
+}
+
+#testForm select {
+	width: 220px;
+    padding: 4px;
+    color: #25383C;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 11px;
+    border: 1px solid #cecece;
+    margin-right: 20px;
+}
+
+#testForm select.error {
+    background: #f8dbdb;
+    border-color: #e77776;
+}
+
+#testForm input.error {
+    background: #f8dbdb;
+    border-color: #e77776;
+}
+
+#testForm textarea {
+    width: 550px;
+    height: 80px;
+    padding: 4px;
+    color: #25383C;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-style: italic;
+    font-size: 11px;
+    border: 1px solid #cecece;
+    margin-top: 2px;
+    margin-right: 20px;
+}
+
+#testForm select.multiple {
+	width: 550px;
+    height: 80px;
+    padding: 4px;
+    color: #25383C;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-style: italic;
+    font-size: 11px;
+    border: 1px solid #cecece;
+    margin-top: 2px;
+    margin-right: 20px;
+}
+
+#testForm select.multiple.error {
+    background: #f8dbdb;
+    border-color: #e77776;
+}
+
+#testForm textarea.error {
+    background: #f8dbdb;
+    border-color: #e77776;
+}
+
+#answerfields {
+	margin-top: 10px;
+}
+
+#answerfields div span.input strong {
+    color: #93d72e;
+    font-weight: bold;
+}
+
+#answerfields div span.error {
+    font-size: 11px;
+    font-style: italic;
+}
+
+#answerfields div span.error strong {
+    color: #e46c6e;
+    font-weight: bold;
+}
+
+#testForm div {
+    margin-bottom: 10px;
+}
+
+#testForm div span.input {
+    font-size: 11px;
+    font-style: italic;
+}
+
+#testForm div span.input strong {
+    color: #93d72e;
+    font-weight: bold;
+}
+
+#testForm div span.error {
+    font-size: 11px;
+    font-style: italic;
+}
+
+#testForm div span.error strong {
+    color: #e46c6e;
+    font-weight: bold;
+}
+
+#testFormError, #testFormInfo, #questionFormError, #questionFormInfo {
+    margin-bottom: 20px;
+    display: none;
+    padding: 5px;
+    font-size: 11px;
+    line-height: 1.1em;
+}
+
+#testFormError strong, #questionFormError strong {
+    color: #e46c6d;
+    font-weight: bold;
+}
+
+#testFormInfo strong, #questionFormInfo strong {
+    color: #93d72e;
+    font-weight: bold;
+}
+
+.facebook-button.error {
+	color: #e46c6d;
+}
+
+.facebook-button.error:hover {
+	color: #3b5998;
+}

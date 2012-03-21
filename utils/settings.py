@@ -1,0 +1,5 @@
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
+TIME_ZONE = 'Europe/Rome'
+LANGUAGE_CODE = 'en-us'
+SITE_ID = 1

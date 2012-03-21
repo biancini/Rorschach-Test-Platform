@@ -1,0 +1,248 @@
+    <script type="text/javascript">
+    <!--
+    var comptot = {{computedindexes|length}};
+    var maxtot = {{numindexes}};  
+    var index_groups = new Array();
+    var index_max = new Array();
+    {% for group in index_groups|dictsort:"order" %}
+    index_groups['{{group.name}}'] = [{% for indexname in group.indexes %}{% if indexname in computedindexes %}'{{indexname}}', {% endif %}{% endfor %}''];
+    index_max['{{group.name}}'] = {{group.indexes|length}};
+    {% endfor %}
+    
+    function computeIndex(groupname, indexname) {
+        var numcomp = -1;
+        var numtot = -1;
+        var already = false;
+        
+        for (i = 0; i < index_groups[groupname].length; i++) {
+            if (index_groups[groupname][i] == indexname) {
+                already = true;
+            }
+        }
+        
+        if (!already) {
+            comptot++;
+            index_groups[groupname][index_groups[groupname].length] = indexname;
+            numcomp = index_groups[groupname].length - 1;
+            numtot = index_max[groupname];
+                        
+            $('#tot_num').text(comptot);
+            $('.bulletchart').text(comptot + ", " + maxtot + ", " + comptot);
+            $('.bulletchart').sparkline('html', {type: 'bullet', performanceColor: '#3b5998', rangeColors: ['#78C7F0'], targetWidth: 3, targetColor: 'red', height: 12});
+                        
+            $('#' + groupname + '_num').text(numcomp);
+            $('.' + groupname + '_bulletchart').text(numcomp + ", " + numtot + ", " + numcomp);
+            $('.' + groupname + '_bulletchart').sparkline('html', {type: 'bullet', performanceColor: '#3b5998', rangeColors: ['#78C7F0'], targetWidth: 3, targetColor: 'red', height: 12});
+        }
+    }
+    // -->
+    </script>
+
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Profile page for <strong>{{me.name}}</strong></h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/?code={{code}}">Home</a></span>
+        <span><a href="/profile?code={{code}}">Profile</a></span>
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+    <section id="normalsection" class="clearfix">
+      <h3>{{me.first_name}}'s profile (you have computed <span id="tot_num">{{computedindexes|length}}</span> index{% if computedindexes|length != 1 %}es{% endif %} over {{numindexes}} <span class="bulletchart">{{computedindexes|length}}, {{numindexes}}, {{computedindexes|length}}</span>)</h3>
+      <script type="text/javascript">
+      <!--
+        $(document).ready(function() {
+          $('.bulletchart').sparkline('html', {type: 'bullet', performanceColor: '#3b5998', rangeColors: ['#78C7F0'], targetWidth: 3, targetColor: 'red', height: 12});
+        });
+      // -->
+      </script>
+      <p id="picture" style="background-image: url(https://graph.facebook.com/me/picture?type=square&access_token={{token}})"></p>
+	  <p><strong>{{me.first_name}}</strong>, it is strongly suggested you check your profile and verify it has been completely computed and it is up to date.</p>            
+      <p>The profile is really important for the evaluating testing results and must kept up to date.</p>
+      If you think something relevant changed in your FB network, recompute your profile!</p>
+      <p>In the rest of this page, you will find all the computed indexes for your profile and their values.</p>
+      <p>Indexes are computed on your FB contact network, to have see some relevant information about your FB network click the button below.</p>
+      <p class="button" id="{{indexname}}_button"">
+        <a href="network/{{me.id}}?code={{code}}" id="{{indexname}}_compute" class="facebook-button">
+        <span class="plus" id="{{indexname}}_text">View network data</span></a>
+      </p>
+    </section>
+ 
+    {% for group in index_groups|dictsort:"order" %}
+    <section id="normalsection" class="clearfix">
+      <h3>{{me.first_name}}'s {{group.name}} indexes (you have computed <span id="{{group.name}}_num">{{computed_groups|keyfromdict:group.name}}</span> index{% if computedindexes|length != 1 %}es{% endif %} over {{group.indexes|length}} <span class="{{group.name}}_bulletchart">{{computed_groups|keyfromdict:group.name}}, {{group.indexes|length}}, {{computed_groups|keyfromdict:group.name}}</span>)
+      <span class="right">(<a href="#" id="{{group.name}}_compute">compute group</a>)</span></h3>
+      <script type="text/javascript">
+      <!--
+        $(document).ready(function() {
+          $('.{{group.name}}_bulletchart').sparkline('html', {type: 'bullet', performanceColor: '#3b5998', rangeColors: ['#78C7F0'], targetWidth: 3, targetColor: 'red', height: 12});
+        });
+      // -->
+      </script>
+      {% for indexname in group.indexes %}
+        {% if not indexname in computedindexes %}
+            <p class="picturegraph"><a href="index/{{me.id}}/{{indexname}}?code={{code}}"><img id="{{indexname}}_image" src="static/images/notcomputed.jpg" style="width: 80px; height: 80px"></a></p>
+            <div class="indexvalue">
+              <p id="{{indexname}}_title" class="strong">{{ indexname|title }}</p>
+              <p>{{ index_names|keyfromdict:indexname }}</p>
+              <p>&nbsp;</p>
+              <p id="{{indexname}}_message">You do not have a value computed for this index yet.</p>
+              <p class="button" id="{{indexname}}_button"">
+                <a href="#" id="{{indexname}}_compute" class="facebook-button">
+                <span class="plus" id="{{indexname}}_text">Compute your index</span></a>
+              </p>
+            </div>
+         {% else %}
+            <p class="picturegraph"><a href="index/{{me.id}}/{{indexname}}?code={{code}}"><img id="{{indexname}}_image" src="smallgraph/{{me.id}}/{{indexname}}" style="width: 80px; height: 80px"></a></p>
+            <div class="indexvalue">
+              <p id="{{indexname}}_title" class="computed">{{ indexname|title }}</p>
+              <p>{{ index_names|keyfromdict:indexname }}</p>
+              <p>&nbsp;</p>
+              <p id="{{indexname}}_message" class="computed">The computed value for {{ indexname }} is {{ computedindexes|keyfromdict:indexname }} (
+                <a href='index/{{me.id}}/{{indexname}}?code={{code}}'>view</a>, 
+                <a href='#' onclick="post_wall('{{indexname}}', '{{ computedindexes|keyfromdict:indexname }}')">post to wall</a>
+              ).</p>
+              <p class="button" id="{{indexname}}_button">
+                <a href="#" id="{{indexname}}_compute" class="facebook-button">
+                <span class="plus" id="{{indexname}}_text">Re-compute your index</span></a>
+              </p>
+            </div>
+         {% endif %}
+         
+       <script type="text/javascript">
+       <!--
+       $(document).ready(function(){
+          $('#{{indexname}}_compute').click(function() {
+            $('#{{indexname}}_message').removeClass();
+            $('#{{indexname}}_message').text('Computing the updated value for your index...');
+            $('#{{indexname}}_text').text('Computing...');
+          
+            $.ajax({
+              type : 'POST',
+              url : 'computeprofileindex',
+              dataType : 'json',
+              data: {
+            	id : "{{me.id}}",
+                code : "{{code}}",
+                index : "{{indexname}}"
+              },
+              success: function(data) {
+            	$('#{{indexname}}_message').removeClass();
+
+                if (data.error === true) {
+                	$('#{{indexname}}_message').removeClass().addClass('error');
+                    $('#{{indexname}}_message').text(data.msg);
+                    $('#{{indexname}}_image').attr('src', '{{conf.BASE_URL}}static/images/notcomputed.jpg');
+                }
+                else {
+                    $('#{{indexname}}_title').removeClass().addClass('computed');
+                    $('#{{indexname}}_message').removeClass().addClass('computed');
+                    $('#{{indexname}}_message').html(data.msg +
+                   	  " (<a href='index/{{me.id}}/{{indexname}}?code={{code}}'>view</a>," + 
+                   	  " <a href='#' onclick=\"post_wall(indexname, '" + data.value + "')\">post to wall</a>)");
+                    $('#{{indexname}}_image').attr('src', '{{conf.BASE_URL}}smallgraph/{{me.id}}/{{indexname}}');
+                    
+                    computeIndex('{{group.name}}', '{{indexname}}');
+                }
+
+                $('#{{indexname}}_text').text('Re-compute your index');
+              },
+              error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $('#{{indexname}}_message').removeClass().addClass('error');
+                $('#{{indexname}}_message').text('There was an error computing this index: ' + textStatus);
+                $('#{{indexname}}_image').attr('src', '{{conf.BASE_URL}}static/images/notcomputed.jpg');
+
+                $('#{{indexname}}_text').text('Re-compute your index');
+              }
+            });
+  
+            return false;
+          });
+       });
+       //-->
+       </script>
+       {% endfor %}
+     </section>
+     
+     <script type="text/javascript">
+     <!--
+         $(document).ready(function(){
+           $('#{{ group.name }}_compute').click(function() {
+             $.ajax({
+                type : 'POST',
+                url : 'computeprofileindex',
+                dataType : 'json',
+                data: {
+                   id : "{{me.id}}",
+                   code : "{{code}}",
+                   indexgroup : "{{group.name}}"
+                },
+                success : function(data){
+                   indexes = data.indexes.split(',');
+                   
+                   var len = indexes.length;
+                   for(var i = 0; i < len; i++) {
+                      indexname = indexes[i]
+	                  curdata = eval('data.' + indexname);
+                      
+                      $('#' + indexname + '_message').removeClass();
+                      $('#' + indexname + '_message').text(curdata.msg);
+
+                      if (curdata.error === true) {
+                         $('#' + indexname + '_message').removeClass().addClass('error');
+                         $('#' + indexname + '_image').attr('src', '{{conf.BASE_URL}}static/images/macchie.jpg');
+                      }
+                      else {
+                         $('#' + indexname + '_title').removeClass().addClass('computed');
+                         $('#' + indexname + '_message').removeClass().addClass('computed');
+                         $('#' + indexname + '_image').attr('src', '{{conf.BASE_URL}}smallgraph/{{me.id}}/' + indexname);
+                      }
+ 
+                      $('#' + indexname + '_text').text('Re-compute your index');
+                   }
+                },
+                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                   // Do nothing
+                }
+             });
+  
+             return false;
+          });
+       });
+     // -->
+     </script>
+     
+     {% endfor %}
+     
+     <script type="text/javascript">
+     <!--
+       function post_wall(indexname, value) {
+    	   if (window.confirm("Do you really want to post result to your wall?")) {
+	    	   $.ajax({
+	               type : 'POST',
+	               url : 'postwall',
+	               dataType : 'json',
+	               data: {
+	                  code : '{{code}}',
+	                  msgtype : 'index',
+	            	  indexname : indexname,
+	                  value : value,
+	               },
+	               success : function(data){ },
+	               error : function(XMLHttpRequest, textStatus, errorThrown) {
+	                  window.alert("Error while posting to your wall.")
+	               }
+	            });
+    	   }
+    	   
+    	   return false;
+       }       
+       // -->
+       </script>
+    </section>

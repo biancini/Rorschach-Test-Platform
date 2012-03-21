@@ -1,0 +1,123 @@
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Rorschach Test Platform, welcome <strong>{{me.name}}</strong>!</strong></h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/?code={{code}}">Home</a></span>
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+
+    <section id="get-started" class="clearfix">
+      <p class="image"><img src="static/images/home.jpg" alt="Rorschach Test Platform synthesis"></p>
+      <div class="text">
+        <p class="strong">Welcome to Rorschach Testing Platform!</p>
+        <p>This is an application which aims to support psychological tests dispensation leveraging Facebook. On this application administrators publicize tests using Facebook and to reach a wide number of subjects.</p> 
+        <p>Thanks to the features and information offered by Facebook the application is able to enrich the testing data with other relevant information about the users. In particular the application leverages the techniques of Social Network Analysis (SNA, <a href="http://en.wikipedia.org/wiki/Social_network_analysis" target="_blank">read more on Wikipedia</a>) to compute sociological indexes on the users.</p>
+        <p>These indexes are:<br/>
+        - Basic indexes on the network configuration<br/>
+        - Centrality indexes<br/>
+        - Group indexes on subgraphs and cliques</p>
+        <p>This approach permits to obtain richer information on social psychology and other fields in test based psychological research and analysis.</p>
+      </div>
+    </section>
+    
+    <section id="normalsection" class="clearfix">
+      <h3>{{me.first_name}}'s profile (you computed {{computedindexes|length}} index{% if computedindexes|length != 1 %}es{% endif %} over {{numindexes}}: <span class="bulletchart">{{computedindexes|length}}, {{numindexes}}, {{computedindexes|length}}</span>)</h3>
+      <script type="text/javascript">
+      <!--
+        $(document).ready(function() {
+          $('.bulletchart').sparkline('html', {type: 'bullet', performanceColor: '#3b5998', rangeColors: ['#78C7F0'], targetWidth: 3, targetColor: 'red'});
+        });
+      // -->
+      </script>
+      <p id="picture" style="background-image: url(https://graph.facebook.com/me/picture?type=square&access_token={{token}})"></p>
+	  <p><strong>{{me.first_name}}</strong>, it is strongly suggested you check your profile and verify it has been completely computed and it is up to date.</p>            
+      <p>The profile is really important for the evaluating testing results and must kept up to date.</p>
+      If you think something relevant changed in your FB network, recompute your profile!</p>
+        
+      <p class="button"><a href="/profile?code={{code}}" class="facebook-button">
+        <span class="plus">View or compute your profile</span>
+      </a></p>
+    </section>
+
+    <section id="normalsection" class="clearfix">
+      <h3>Take a test</h3>
+      <p>All tests will be executed as OpenSesame tests. OpenSesame is a graphical, open-source experiment builder for the
+      social sciences. It sports a modern and intuitive user interface that allows you to build complex experiments with a
+      minimum of effort. Python scripting is supported as well. With OpenSesame you can create a wide range of experiments:
+      Psychophysics, reaction time tasks, and questionnaires, to name but a few
+      (<a href="http://osdoc.cogsci.nl/" target="_blank">OpenSesame on the web</a>).</p>
+      <p>A specific plug-in has been developed to incorporate sociological indexes computed by this platform. OpenSesame plug-ins
+      integrate with the graphical user interface (GUI) and appear as additional items in the item toolbar, just like the core
+      items (loop, sequence, sketchpad, etc.). On <a href="http://osdoc.cogsci.nl/plug-ins/plug-in-installation" target="_blank">this page</a>
+      you of OpenSesame website you can find a guide about plug-in installation and configuration.</p>
+      <p>The Rorschach Test Platform plug-in can be downloaded <a href="/static/plugins/rorschach_test_platform.zip">following
+      this link</a>.</p>
+      <p>&nbsp;</p>
+      {% if tests|length == 0 %}
+      <p>There are <strong>NO available tests</strong> on Rorschach Test Platform.</p>
+      {% else %}
+        <p>The available tests on Rorschach Test Platform are the following:
+        {% for test in tests %}
+          <br/>
+          - <strong>{{ test.name }}</strong> (start date: {{test.startdate|date:"d/m/Y"}} - end date: {{test.enddate|date:"d/m/Y"}})<br/>
+          &nbsp;&nbsp;Test description: <i>{{ test.description }}</i><br/>
+          {% if test.testfile != None %}
+          &nbsp;&nbsp;<a href="/opensesame/testfile?testid={{test.testid}}&code={{code}}">Download OpenSesame test file</a>.<br/>
+          {% endif %}
+        {% endfor %}
+        </p>
+      {% endif %}
+    </section>
+      
+    {% if 'administrator' in roles %}
+    <section id="normalsection" class="clearfix">
+      <h3>Administration pages</h3>
+      <p>This section permits to administer the tests configured on the platform and to view administration tasks for the application.</p>
+      <p>From this section an administrator can create, view or modify tests.</p>
+      <p class="button"><a href="/admin?code={{code}}" class="facebook-button">
+        <span class="plus">Enter Administration</span>
+      </a></p>
+      </div>
+    </section>
+    {% endif %}
+    
+    {% if 'technician' in roles %}
+    <section id="normalsection" class="clearfix">
+      <h3>Technical administration pages</h3>
+      <p>This section permits to administer the application and access techincal pages.</p>
+      <p>From this section a technician can view application information, navigate the database and modify the configurations.</p>
+      <p class="button"><a href="/tech?code={{code}}" class="facebook-button">
+        <span class="plus">Enter Technical Administration</span>
+      </a></p>
+      </div>
+    </section>
+    {% endif %}
+
+    <section id="normalsection" class="clearfix">
+      <h3>{{me.first_name}}'s friends using this app</h3>
+      {% if app_friends|length > 0 %}
+        <ul class="friends">
+        {% for friend in app_friends %}
+          <li>
+            <a href="#" onclick="window.open('http://www.facebook.com/{{friend.uid}}')">
+              <img src="https://graph.facebook.com/{{friend.uid}}/picture?type=square" alt="{{friend.name}}">
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+        <p>No-one of your friends is already using this application!</p>
+        <p>Why don't you suggest this application to some of them?<br/><br/></p>
+        <p class="button"><a href="#" class="facebook-button" onclick="popup('{{ SEND_TO }}', 'Send', 580, 400);">
+          <span class="speech-bubble">Invite friends</span>
+        </a></p>
+        {% endif %}
+      </div>
+    </section>

@@ -1,0 +1,42 @@
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(../static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Test results page</h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/?code={{code}}">Home</a></span>
+        <span><a href="/admin?code={{code}}">Administration</a></span>
+        <span><a href="/admin/viewtestresults?testid={{test.testid}}&code={{code}}">Test results</a></span>
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+  
+    <section id="normalsection" class="clearfix">
+      <h3>Test <strong>"{{test.name}}"</strong>: view test results.</h3>
+      <p>In the following the uploaded test results for the selected test.</p>
+      <div field="send">  
+        <p class="button">
+          <a href="/admin/testresults.xml?testid={{test.testid}}&code={{code}}" id="send" class="facebook-button">
+          <span class="plus">Upload result file</span></a>
+          
+          <a href="/admin/testresults.xml?testid={{test.testid}}&code={{code}}" id="send" class="facebook-button">
+          <span class="plus">Delete all test results</span></a>
+          
+          &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;
+        
+          <a href="/admin/testresults.xml?testid={{test.testid}}&code={{code}}" id="send" class="facebook-button">
+          <span class="plus">Download xml</span></a>
+           
+          <a href="/admin/testresults.csv?testid={{test.testid}}&code={{code}}" id="send" class="facebook-button">
+          <span class="plus">Download csv</span></a> 
+            
+          <a href="/admin/testresults.xls?testid={{test.testid}}&code={{code}}" id="send" class="facebook-button">
+          <span class="plus">Download xls</span></a> 
+        </p>
+      </div>
+      
+    </section>

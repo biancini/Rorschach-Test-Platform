@@ -1,0 +1,35 @@
+application: rorschach-test-platform
+version: opensesame
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+builtins:
+- remote_api: off
+- appstats: off
+
+handlers:  
+- url: /favicon\.ico
+  static_files: static/images/favicon.ico
+  upload: static/images/favicon\.ico
+
+- url: /static
+  static_dir: static
+
+- url: /tech.*
+  script: techapp.app
+  secure: always
+  
+- url: /.*
+  script: webapp.app
+  secure: always
+
+libraries:
+- name: numpy
+  version: latest
+- name: jinja2
+  version: latest
+- name: setuptools
+  version: latest
+- name: markupsafe
+  version: latest

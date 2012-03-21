@@ -1,0 +1,66 @@
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(../static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Administration page for <strong>{{me.name}}</strong></h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/?code={{code}}">Home</a></span>
+        <span><a href="/admin?code={{code}}">Administration</a></span>
+        <span><a href="/admin/createtest?code={{code}}">Create a test</a></span>
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+  
+    <section id="normalsection" class="clearfix">
+      <h3>Create a new psychological test.</h3>
+      <p>From this page you will be able to create a psychological test.</p>
+    </section>
+
+    <section id="normalsection" class="clearfix">
+    <form action="{{upload_url}}" method="POST" enctype="multipart/form-data" id="testForm">
+      <input id="testid" name="testid" type="hidden" {% if test != None %} value="{{test.testid}}"{% endif %}/>
+      <h3>Input test general data</h3>
+      <div field="testname">
+        <label for="testname"><strong>Test name</strong>: insert the name of the test.</label>
+        <input id="testname" name="testname" type="text" {% if test != None %} value="{{test.name}}"{% endif %}/> 
+        <span class="input" id="testnameInfo"><strong>Valid input</strong></span>
+        <span class="error" id="testnameError"><strong>Invalid input:</strong> the test name must have more than 5 letters.</span> 
+      </div>
+      <div field="testdescription">
+        <label for="testdescription"><strong>Test description</strong>: insert a description for the test.</label>
+        <textarea id="testdescription" name="testdescription" />{% if test != None %}{{test.description}}{% endif %}</textarea> 
+        <span class="input" id="testdescriptionInfo"><strong>Valid input</strong></span>
+        <span class="error" id="testdescriptionError"><strong>Invalid input:</strong> the test description must have more than 20 letters.</span> 
+      </div>
+      <div field="teststartdate">
+        <label for="teststartdate"><strong>Test start date</strong>: insert the date when the test will start its execution phase.</label>
+        <input id="teststartdate" name="teststartdate" type="text" {% if test != None %} value="{{test.startdate|date:"d/m/Y"}}"{% endif %}/> 
+        <span class="input" id="teststartdateInfo"><strong>Valid input</strong></span>
+        <span class="error" id="teststartdateError"><strong>Invalid input:</strong> the test start date must be a valid date field.</span> 
+      </div>
+      <div field="testenddate">
+        <label for="testenddate"><strong>Test end date</strong>: insert the date when the test will end its execution phase.</label>
+        <input id="testenddate" name="testenddate" type="text" {% if test != None %} value="{{test.enddate|date:"d/m/Y"}}"{% endif %}/> 
+        <span class="input" id="testenddateInfo"><strong>Valid input</strong></span>
+        <span class="error" id="testenddateError"><strong>Invalid input:</strong> the test end date must be a valid date field and must be subsequent to the test start date.</span> 
+      </div>
+      <div field="testfile">
+        <label for="testfile"><strong>Test OpenSesame file</strong>: optional, insert the file of the OpenSesame test.</label>
+        <input id="testfile" name="testfile" type="file"/> 
+        <span class="input" id="testfileInfo">{% if test != None and test.testfilename != None %}<strong>Uploaded file:</strong> {{test.testfilename}} {% endif %}</span>
+        <span class="error" id="testfileError"></span> 
+      </div>
+      <div field="send">
+         <p class="button">
+            <a href="#" id="send" class="facebook-button">
+            <span class="plus">Save the test</span></a>
+            <span id="testFormInfo"><strong>Valid input:</strong> the test is ready to be saved.</span>
+            <span id="testFormError"><strong>Invalid input:</strong> the test cannot be saved, you have wrong input.</span> 
+         </p>
+      </div>
+    </form>
+    </section>

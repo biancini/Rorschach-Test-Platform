@@ -1,0 +1,101 @@
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Administration page for <strong>{{me.name}}</strong></h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/?code={{code}}">Home</a></span>
+        <span><a href="/admin?code={{code}}">Administration</a></span>
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+  
+    <section id="normalsection" class="clearfix">
+      <h3>Administration console for test administrators.</h3>
+      <p>From this page you will be able to create and modify psychological tests. From here, you will also
+      have the opportunity view the computed sociological indexes of the users and download them to your PC for manipulation.</p>
+      <p>All tests will be executed as OpenSesame tests. OpenSesame is a graphical, open-source experiment builder for the
+      social sciences. It sports a modern and intuitive user interface that allows you to build complex experiments with a
+      minimum of effort. Python scripting is supported as well. With OpenSesame you can create a wide range of experiments:
+      Psychophysics, reaction time tasks, and questionnaires, to name but a few
+      (<a href="http://osdoc.cogsci.nl/" target="_blank">OpenSesame on the web</a>).</p>
+      <p>A specific plug-in has been developed to incorporate sociological indexes computed by this platform. OpenSesame plug-ins
+      integrate with the graphical user interface (GUI) and appear as additional items in the item toolbar, just like the core
+      items (loop, sequence, sketchpad, etc.). On <a href="http://osdoc.cogsci.nl/plug-ins/plug-in-installation" target="_blank">this page</a>
+      you of OpenSesame website you can find a guide about plug-in installation and configuration.</p>
+      <p>The Rorschach Test Platform plug-in can be downloaded <a href="/static/plugins/rorschach_test_platform.zip">following
+      this link</a>.</p>
+    </section>
+
+    <section id="normalsection" class="clearfix">
+       <h3>Create or modify tests</h3>
+       <p>From here you will be allowed to create or modify psychologica tests.<br/>
+       The real tests are defined within the OpenSesame platform (<a href="http://www.cogsci.nl/software/opensesame">link to the platform website</a>). The definition
+       in this section is only used to permit a test defined in OpenPlatform to integrate with the Rorschach Test Platform via the proper plugin.</p>
+       
+       {% if tests|length == 0 %}
+         <p>Currently there is no test defined in this platform.</p>
+       {% else %}
+         {% for test in tests %}
+           <div class="texttest">
+           {% if withindates|keyfromdict:test.name %}
+             <p style="title"><strong>Test: {{test.name}}</strong>
+             {% if test.owner == me.id %}
+               (the test is currently {% if not test.active %}in{% endif %}active,
+               {% if test.active %}
+                 <a href="/admin/activatetest?active=false&testid={{test.testid}}&code={{code}}">deactivate</a>)
+               {% else %}
+                 <a href="/admin/activatetest?active=true&testid={{test.testid}}&code={{code}}">activate</a>)
+               {% endif %}
+             {% endif %}
+             </p>
+           {% else %}
+             <p style="title"><strong>Test: {{test.name}}</strong> (the test is currently expired)
+           {% endif %}
+           <p>{{test.getObjTest.testkey}}</p>
+           <p>{{test.getObjTest.description}}</p>
+           {% if test.owner == me.id %}
+             <p class="button">
+               <a href="/admin/testresults?testid={{test.testid}}&code={{code}}" class="facebook-button">
+               <span class="plus">View test results</span></a>
+             
+               <a href="/admin/edittest?testid={{test.testid}}&code={{code}}" class="facebook-button">
+               <span class="plus">Modify existing test</span></a>
+         
+               <a href="/admin/deltest?testid={{test.testid}}&code={{code}}" class="facebook-button">
+               <span class="plus">Delete existing test</span></a>
+             </p>
+           {% endif %}
+         {% endfor %}
+       {% endif %}
+       <p>&nbsp;</p>
+       <p>Select the button below to create a new test on this platform.</p>
+       <p class="button">
+          <a href="/admin/newtest?code={{code}}" class="facebook-button">
+          <span class="plus">Create a new test</span></a>
+       </p>
+    </section>
+
+    <section id="normalsection" class="clearfix">
+       <h3>View user networks</h3>
+       <p>From here you will be allowed to browse user networks. The data for each user can be seen as stored in the database.</p>
+       <p>Select the button below to view the users' network data.</p>
+       <p class="button">
+          <a href="/admin/viewnetwork?code={{code}}" class="facebook-button">
+          <span class="plus">View users' network data</span></a>
+       </p>
+    </section>
+    
+    <section id="normalsection" class="clearfix">
+       <h3>View user indexes</h3>
+       <p>From here you will be allowed to browse user indexs. The data for each user can be seen as stored in the database.</p>
+       <p>Select the button below to view the users' indexes data.</p>
+       <p class="button">
+          <a href="/admin/viewindex?code={{code}}" class="facebook-button">
+          <span class="plus">View users' indexes data</span></a>
+       </p>
+    </section>

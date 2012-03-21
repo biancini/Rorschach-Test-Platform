@@ -1,0 +1,186 @@
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(../static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Administration page for <strong>{{me.name}}</strong></h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/?code={{code}}">Home</a></span>
+        <span><a href="/{{mode}}?code={{code}}">{%if mode == "tech"%}Tech a{%else%}A{%endif%}dministration</a></span>
+        <span><a href="/{{mode}}/viewnetwork?code={{code}}">View users' networks</a></span>
+        {% if network != None %}
+        <span><a href="/{{mode}}/viewnetwork?uid={{network.uid}}&code={{code}}">View network of user {{network.uid}}</a></span>
+        {% endif %}
+        {% if uid == '_new_' %}
+        <span><a href="/{{mode}}/viewnetwork?uid={{network.uid}}&code={{code}}">View network of new user</a></span>
+        {% endif %}
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+  
+    <section id="normalsection" class="clearfix">
+      <h3>View user's network.</h3>
+      <p>From this page you will be able to see {%if mode == "tech" %}and modify{%endif%} the network information for registered users.</p>
+    </section>
+    
+    <section id="normalsection" class="clearfix">
+	<h3>Download all networks data:</h3>
+	<p>Download the network data for all users in csv, xls format.</p>
+	
+	<div field="send">  
+         <p class="button">
+            <a href="/admin/networks.xml?code={{code}}" id="send" class="facebook-button">
+            <span class="plus">Download xml</span></a>
+            
+            <a href="/admin/networks.csv?code={{code}}" id="send" class="facebook-button">
+            <span class="plus">Download csv</span></a> 
+            
+            <a href="/admin/networks.xls?code={{code}}" id="send" class="facebook-button">
+            <span class="plus">Download xls</span></a>
+            
+            <a href="/admin/networks.docs?code={{code}}" id="send" class="facebook-button" target="_blank">
+        	<span class="plus">Download in Google Docs</span></a>
+         </p> 
+         </p>
+      </div>
+	</section>
+    
+    <section id="normalsection" class="clearfix">
+	{% if uid == None %}
+	<h3>Select the user of interest to see his/her network information:</h3>
+	<form action="{{upload_url}}" method="POST" enctype="multipart/form-data" id="testForm">
+	  <input id="action" name="action" type="hidden" value="selectUid" />
+      <div field="uid">
+         <label for="uid"><strong>User</strong>: select the user whose network data you want to see.</label>
+         <select id="uid" name="uid">
+           <option value="_new_">New user network</option>
+           {% for user in users %}
+           <option value="{{user.uid}}">{{user.first_name}} {{user.last_name}}</option>
+           {% endfor %}
+         </select>
+      </div>
+      <div field="send">  
+         <!--input id="send" name="send" type="submit" value="Save the test" /-->
+         <p class="button">
+            <a href="#" id="send" class="facebook-button" onclick="$('#testForm').submit();">
+            <span class="plus">Show user network data</span></a> 
+         </p>  
+      </div> 
+	</form>
+	{% else %}
+	{% if uid == '_new_' %}
+    <h3>Network data for new user:</h3>
+    {% else %}
+    <h3>Network data for user {{uid}}:</h3>
+    {% endif %}
+    <form action="{{upload_url}}" method="POST" enctype="multipart/form-data" id="testForm">
+      <input id="action" name="action" type="hidden" value="saveNetwork" />
+      <div field="uid">
+         <label for="uid"><strong>User ID</strong>: specify the user ID of the user owner of the network.</label>
+         <input id="uid" name="uid" type="text" {%if network != None%}value="{{network.uid}}" readonly{%endif%}{%if uid != '_new_'%}value="{{uid}}" readonly{%endif%} />
+         {% if mode == "tech" or network == None or network.nodes == None or network.edges == None %}
+         <p class="button"><a href="#" class="facebook-button" id="downloadnodes">
+         <span class="plus" id="donwloadnodes_text">Download nodes and edges for the user</span></a></p>
+         <script type="text/javascript">
+      	 <!--
+         $(document).ready(function(){
+            $('#downloadnodes').click(function() {
+              $('#donwloadnodes_text').text('Downloading...');
+              $('#donwloadnodes_text').removeClass('hover');
+              
+              $.ajax({
+                type : 'POST',
+                url : '/{{mode}}/savenetwork',
+                dataType : 'json',
+                data: {
+                	uid: $('#uid').val(),
+                    code: '{{code}}',
+                    action: 'getNodes'
+                },
+                success: function(data) {
+                	$('#donwloadnodes_text').text('Download nodes and edges for the user');
+                	$('#nodes').val(data.nodes);
+                	$('#edges').val(data.edges);
+                	$('#networkhash').val(data.networkhash);
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                	$('#donwloadnodes_text').text('Download nodes and edges for the user');
+                	alert("Error while donwloading nodes and edges for the user: " + textStatus);
+                }
+              });
+              return false;
+            });
+         });
+         //-->
+         </script>  
+         {% endif %}
+      </div>
+      <div field="updated_time">
+         <label for="updated_time"><strong>Update time</strong>: specify the update time of the data input for the network.</label>
+         <input id="updated_time" name="updated_time" type="text" {%if network != None%}value="{{network.updated_time}}"{%endif%} readonly />  
+      </div>
+      <div field="networkhash">
+         <label for="networkhash"><strong>Network hash</strong>: specify the network hash identifying the network status when the other information has been computed.</label>
+         <input id="networkhash" name="networkhash" type="text" {%if network != None%}value="{{network.networkhash}}"{%endif%} style="width: 550px" {%if mode != "tech"%}readonly{%endif%}/>  
+      </div>
+      <div field="nodes">
+         <label for="nodes"><strong>Network nodes</strong>: list of the nodes of the network.</label>
+         <textarea id="nodes" name="nodes" {%if mode != "tech"%}readonly="readonly"{%endif%}/>{%if network != None%}{{network.getnodes}}{%endif%}</textarea>  
+      </div>
+      <div field="edges">
+         <label for="edges"><strong>Network edges</strong>: list of the edges of the network.</label>
+         <textarea id="edges" name="edges" {%if mode != "tech"%}readonly="readonly"{%endif%}/>{%if network != None%}{{network.getedges}}{%endif%}</textarea>  
+      </div>
+      <div field="league">
+         <label for="league"><strong>Network league</strong>: list of the elite nodes of the network.</label>
+         <textarea id="league" name="league" {%if mode != "tech"%}readonly="readonly"{%endif%}/>{%if network != None%}{{network.getleague}}{%endif%}</textarea>
+         {% if mode == "tech" or network == None or network.nodes == None or network.edges == None %}
+         <p class="button"><a href="#" class="facebook-button" id="computeleague">
+         <span class="plus" id="computeleague_text">Compute network league</span></a></p>
+         <script type="text/javascript">
+      	 <!--
+         $(document).ready(function(){
+            $('#computeleague').click(function() {
+              $('#computeleague_text').text('Computing...');
+              $('#computeleague_text').removeClass('hover');
+              
+              $.ajax({
+                type : 'POST',
+                url : '/{{mode}}/savenetwork',
+                dataType : 'json',
+                data: {
+                	uid: $('#uid').val(),
+                    code: '{{code}}',
+                    nodes: $('#nodes').val(),
+                    edges: $('#edges').val(),
+                    action: 'computeLeague'
+                },
+                success: function(data) {
+                	$('#computeleague_text').text('Compute network league');
+                	$('#league').val(data.league);
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                	$('#computeleague_text').text('Compute network league');
+                	alert("Error while compyting network league: " + textStatus);
+                }
+              });
+              return false;
+            });
+         });
+         //-->
+         </script>  
+         {% endif %}  
+      </div>
+      <div field="send">  
+         <!--input id="send" name="send" type="submit" value="Save the test" /-->
+         <p class="button">
+            <a href="#" id="send" class="facebook-button" onclick="$('#testForm').submit();">
+            <span class="plus">{% if mode == 'tech' %}Save the network data{% else %}Back{% endif %}</span></a> 
+         </p>  
+      </div> 
+    </form>
+    {% endif %}
+    </section>

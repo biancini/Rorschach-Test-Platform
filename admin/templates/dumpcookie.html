@@ -1,0 +1,26 @@
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(../static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Cookie dump</h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/?code={{code}}">Home</a></span>
+        <span><a href="/tech?code={{code}}">Technical administration</a></span>
+        <span><a href="/tech/dumpcookie?code={{code}}">Cookie dump</a></span>
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+  
+    <section id="normalsection" class="clearfix">
+      <h3>Dump of the session cookie sent from the browser.</h3>
+      <p>From this page you will be able to see the dump of the cookie sent by your browser to the application.</p>
+    </section>
+
+    <section id="normalsection" class="clearfix">
+       <h3>Coockie dump</h3>
+       <pre>{{cookie}}</pre>
+    </section>

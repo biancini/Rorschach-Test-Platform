@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% if header == "sociologicalindex" %}
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# {{conf.APP_NAMESPACE}}: http://ogp.me/ns/fb/{{conf.APP_NAMESPACE}}#">
+    <meta charset="utf-8" />
+	<meta property="fb:app_id"      content="{{conf.FBAPI_APP_ID}}" /> 
+	<meta property="og:type"        content="{{conf.APP_NAMESPACE}}:sociological_index" /> 
+	<meta property="og:url"         content="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}" /> 
+	<meta property="og:title"       content="{{indexname|title}} Sociological Index" /> 
+	<meta property="og:image"       content="{{conf.BASE_URL}}smallgraph/{{uid}}/{{indexname}}" />
+	<meta property="og:description" content="{{description}}" />
+	<meta property="og:index_name"  content="{{indexname}}" />
+	<meta property="og:index_value" content="{{value}}" />
+  {% else %}
+  {% if header == "network" %}
+  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# {{conf.APP_NAMESPACE}}: http://ogp.me/ns/fb/{{conf.APP_NAMESPACE}}#">
+  	<meta charset="utf-8" />
+	<meta property="fb:app_id"      content="{{conf.FBAPI_APP_ID}}" /> 
+	<meta property="og:type"        content="{{conf.APP_NAMESPACE}}:network" /> 
+	<meta property="og:url"         content="{{conf.BASE_URL}}network/{{uid}}" /> 
+	<meta property="og:title"       content="Network" /> 
+	<meta property="og:image"       content="{{conf.BASE_URL}}static/images/macchie.jpg" />
+	<meta property="og:nodes"       content="{{nodes|length}}" />
+	<meta property="og:edges"       content="{{edges|length}}" />
+	<meta property="og:description" content="Network object" />
+  {% else %}
+  <head>
+    <meta charset="utf-8" />
+  {% endif %}
+  {% endif %}
+    <title>{{app.name}}</title>
+  
+  	<link href="/static/styles/reset.css" media="screen" rel="stylesheet" />
+  	{% if isdesktop %}
+      <link href="/static/styles/base.css" media="screen" rel="stylesheet" />
+    {% else %}
+      <link href="/static/styles/mobile.css" media="screen" rel="stylesheet"  />
+    {% endif %}
+    <link href="/static/styles/index.css" media="screen" rel="stylesheet" />
+    <link href="/static/styles/form.css" media="screen" rel="stylesheet"  />
+    
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript" src="/static/scripts/jquery.sparkline.js"></script>
+	{% if header == 'viewcreatetest' %}
+	<link href="/static/styles/jquery-ui-1.8.17.custom.css" media="screen" rel="stylesheet"  />
+	<script type="text/javascript" src="/static/scripts/testvalidation.js"></script>
+	<script type="text/javascript" src="/static/scripts/jquery-ui-1.8.17.custom.min.js"></script>
+	{% endif %}
+	
+	<script type="text/javascript">
+    <!--
+    function popup(pageURL, title,w,h) {
+    	var left = (screen.width/2)-(w/2);
+    	var top = (screen.height/2)-(h/2);
+    	var targetWin = window.open( pageURL, title, 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left );
+    }
+    //-->
+    </script>
+    <!--[if IE]>
+      <script type="text/javascript">
+      <!--
+        var tags = ['header', 'section'];
+        while(tags.length)
+          document.createElement(tags.pop());
+      // -->
+      </script>
+    <![endif]-->
+	
+	<script type="text/javascript">
+    <!--
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-256445-3']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    // -->
+    </script> 
+  </head>
+  <body>

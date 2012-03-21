@@ -1,0 +1,16 @@
+indexes:
+
+- kind: User
+  ancestor: no
+  properties:
+  - name: uid
+  - name: updated_time
+    direction: desc
+  
+- kind: Index
+  ancestor: no
+  properties:
+  - name: name
+  - name: uid
+  - name: updated_time
+    direction: desc

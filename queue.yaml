@@ -1,0 +1,14 @@
+queue:
+- name: indexes-queue
+  rate: 5/s
+  bucket_size: 50
+  retry_parameters:
+    task_retry_limit: 2
+    task_age_limit: 5m
+    
+- name: gdocs-queue
+  rate: 5/s
+  bucket_size: 10
+  retry_parameters:
+    task_retry_limit: 2
+    task_age_limit: 5m

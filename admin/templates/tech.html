@@ -1,0 +1,50 @@
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Technical administration page for <strong>{{me.name}}</strong></h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/?code={{code}}">Home</a></span>
+        <span><a href="/tech?code={{code}}">Technical administration</a></span>
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+  
+    <section id="normalsection" class="clearfix">
+      <h3>Technical administration console for administrators.</h3>
+      <p>From this page you will be able to create and modify application configurations and database data.</p>
+    </section>
+
+    <section id="normalsection" class="clearfix">
+       <h3>View coockie dump</h3>
+       <p>From here you will be allowed to see the dump of the cookie holding session data.</p>
+       <p>Select the button below to view the dump of the cookie sent from your browser.</p>
+       <p class="button">
+          <a href="/tech/dumpcookie?code={{code}}" class="facebook-button">
+          <span class="plus">View cookie dump</span></a>
+       </p>
+    </section>
+
+    <section id="normalsection" class="clearfix">
+       <h3>View user networks</h3>
+       <p>From here you will be allowed to browse and edit user networks. The data for each user can be seen as stored in the database.</p>
+       <p>Select the button below to view the users' network data.</p>
+       <p class="button">
+          <a href="/tech/viewnetwork?code={{code}}" class="facebook-button">
+          <span class="plus">View users' network data</span></a>
+       </p>
+    </section>
+    
+    <section id="normalsection" class="clearfix">
+       <h3>View user indexes</h3>
+       <p>From here you will be allowed to browse and edit user indexs. The data for each user can be seen as stored in the database.</p>
+       <p>Select the button below to view the users' indexes data.</p>
+       <p class="button">
+          <a href="/tech/viewindex?code={{code}}" class="facebook-button">
+          <span class="plus">View users' indexes data</span></a>
+       </p>
+    </section>

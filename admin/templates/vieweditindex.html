@@ -1,0 +1,207 @@
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(../static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Administration page for <strong>{{me.name}}</strong></h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/?code={{code}}">Home</a></span>
+        <span><a href="/{{mode}}?code={{code}}">{%if mode == "tech"%}Tech a{%else%}A{%endif%}dministration</a></span>
+        <span><a href="/{{mode}}/viewindex?code={{code}}">View users' indexes</a></span>
+        {% if uid != None %}
+        <span><a href="/{{mode}}/viewindex?uid={{network.uid}}&code={{code}}">View indexes of user {{uid}}</a></span>
+        {% endif %}
+        {% if uid != None and index != None %}
+        <span><a href="/{{mode}}/viewindex?uid={{network.uid}}&code={{code}}">View {{index.name}} index of user {{uid}}</a></span>
+        {% endif %}
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+  
+    <section id="normalsection" class="clearfix">
+      <h3>View user's index data.</h3>
+      <p>From this page you will be able to see {%if mode == "tech" %}and modify{%endif%} the index value and information for registered users.</p>
+    </section>
+    
+    <section id="normalsection" class="clearfix">
+	<h3>Download all index data:</h3>
+	<p>Download the index data for all users in csv, xls format.</p>
+	
+	<div field="send">  
+      <p class="button">
+        <a href="/admin/indexes.xml?code={{code}}" id="send" class="facebook-button">
+        <span class="plus">Download xml</span></a>
+           
+        <a href="/admin/indexes.csv?code={{code}}" id="send" class="facebook-button">
+        <span class="plus">Download csv</span></a>
+            
+        <a href="/admin/indexes.xls?code={{code}}" id="send" class="facebook-button">
+        <span class="plus">Download xls</span></a>
+        
+        <a href="/admin/indexes.docs?code={{code}}" id="send" class="facebook-button" target="_blank">
+        <span class="plus">Download in Google Docs</span></a>
+      </p>
+    </div>
+	</section>
+    
+    <section id="normalsection" class="clearfix">
+	{% if uid == None %}
+	<h3>Select the user of interest to see his/her index information:</h3>
+	<form action="{{upload_url}}" method="POST" enctype="multipart/form-data" id="testForm">
+	  <input id="action" name="action" type="hidden" value="viewIndex" />
+      <div field="uid">
+         <label for="uid"><strong>User</strong>: select the user whose index data you want to see.</label>
+         <select id="uid" name="uid">
+           <option value="" />
+           {% for user in users %}
+           <option value="{{user.uid}}">{{user.first_name}} {{user.last_name}}</option>
+           {% endfor %}
+         </select>
+      </div>
+      <div field="indexname" id="indexname_div">
+         <label for="indexname"><strong>Index name</strong>: select the index you want to see by its name.</label>
+         <select id="indexname" name="indexname">
+           {% for index in indexes %}
+           <option value="{{index.name}}">{{index.name|title}}</option>
+           {% endfor %}
+         </select>
+         <span id="indexname_msg" />
+      </div>
+      <div field="send">  
+         <p class="button">
+            <a href="#" id="send" class="facebook-button" onclick="$('#testForm').submit();">
+            <span class="plus">Show user index data</span></a> 
+         </p>  
+      </div>
+	</form>
+	<script type="text/javascript">
+    <!--
+     String.prototype.capitalize = function(){
+       return this.replace( /(^|\s)([a-z])/g , function(m,p1,p2){ return p1+p2.toUpperCase(); } );
+     };
+     
+     $(document).ready(function(){
+        if ($('#uid').val() == "") $('#indexname_div').hide();
+        $('#indexname_msg').hide();
+        
+        $('#uid').change(function() {
+          $('#indexname_div').show();
+          $('#indexname_msg').text("Downloading indexes...");
+          $('#indexname_msg').show();
+          $('#indexname').empty();
+          
+          if ($('#uid').val() != "") {
+            $.ajax({
+              type : 'POST',
+              url : '/{{mode}}/saveindex',
+              dataType : 'json',
+              data: {
+            	uid: $('#uid').val(),
+                code: '{{code}}',
+                action: 'selectUid'
+              },
+              success: function(data) {
+            	$('#indexname_msg').hide();
+            	$('#indexname').empty();
+
+				$('#indexname').append(new Option("New Index", "_new", true, true));
+            	for (var indexid in data.indexes) {
+            		$('#indexname').append(new Option(data.indexes[indexid].capitalize(), data.indexes[indexid], true, true));
+            	}
+              },
+              error: function(XMLHttpRequest, textStatus, errorThrown) {
+            	$('#indexname_msg').text("Error while downloading index names: " + textStatus);
+              }
+            });
+           }
+          return false;
+        });
+     });
+     //-->
+     </script>
+	{% else %}
+	{% if index != None %}
+    <h3>Index "{{index.name}}" data for user {{uid}}:</h3>
+    {% else %}
+    <h3>New index data for user {{uid}}:</h3>
+    {% endif %}
+    <form action="{{upload_url}}" method="POST" enctype="multipart/form-data" id="testForm">
+      <input id="action" name="action" type="hidden" value="saveIndex" />
+      <div field="uid">
+         <label for="uid"><strong>User ID</strong>: specify the user ID of the user owner of the index.</label>
+         <input id="uid" name="uid" type="text" {%if index != None%}value="{{index.uid}}"{%else%}value="{{uid}}"{%endif%} readonly />
+      </div>
+      <div field="indexname">
+         <label for="indexname"><strong>Index name</strong>: specify the index name you want to see user's data.</label>
+         <input id="indexname" name="indexname" type="text" {%if index != None%}value="{{index.name}}" readonly{%endif%} />
+      </div>
+      <div field="updated_time">
+         <label for="updated_time"><strong>Update time</strong>: specify the update time of the data input for the index.</label>
+         <input id="updated_time" name="updated_time" type="text" {%if index != None%}value="{{index.updated_time}}"{%endif%} readonly />  
+      </div>
+      <div field="networkhash">
+         <label for="networkhash"><strong>Network hash</strong>: specify the network hash identifying the network status when the other information has been computed.</label>
+         <input id="networkhash" name="networkhash" type="text" {%if index != None%}value="{{index.networkhash}}"{%endif%} style="width: 550px" {%if mode != "tech"%}readonly{%endif%}/>  
+      </div>
+      <div field="value">
+         <label for="value"><strong>Index value</strong>: show the index value for specified index.</label>
+         <input id="value" name="value" type="text" {%if index != None%}value="{{index.value}}"{%endif%} style="width: 550px"/>  
+      </div>
+      <div field="nodevalues">
+         <label for="nodevalues"><strong>Index nodes values</strong>: statistics for nodes.</label>
+         <textarea id="nodevalues" name="nodevalues" {%if mode != "tech"%}readonly="readonly"{%endif%}/>{%if index != None and index.get_nodevalues != None%}{{index.get_nodevalues}}{%endif%}</textarea>  
+      </div>
+      <div field="edgevalues">
+         <label for="edgevalues"><strong>Index edges values</strong>: statistics for edges.</label>
+         <textarea id="edgevalues" name="edgevalues" {%if mode != "tech"%}readonly="readonly"{%endif%}/>{%if index != None and index.get_edgevalues != None%}{{index.get_edgevalues}}{%endif%}</textarea>  
+         {% if mode == "tech" or index == None %}
+         <p class="button"><a href="#" class="facebook-button" id="computeindex">
+         <span class="plus" id="computeindex_text">Compute index value</span></a></p>
+         <script type="text/javascript">
+      	 <!--
+         $(document).ready(function(){
+            $('#computeindex').click(function() {
+              $('#computeindex_text').text('Computing...');
+              $('#computeindex_text').removeClass('hover');
+              
+              $.ajax({
+                type : 'POST',
+                url : '/{{mode}}/saveindex',
+                dataType : 'json',
+                data: {
+                	uid: $('#uid').val(),
+                    code: '{{code}}',
+                    indexname: $('#indexname').val(),
+                    action: 'computeIndex'
+                },
+                success: function(data) {
+                	$('#computeindex_text').text('Compute index value');
+                	$('#value').val(data.value);
+                	$('#nodevalues').val(data.nodes);
+                	$('#edgevalues').val(data.edges);
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                	$('#computeindex_text').text('Compute index value');
+                	alert("Error while computing index value: " + textStatus);
+                }
+              });
+              return false;
+            });
+         });
+         //-->
+         </script>  
+         {% endif %}  
+      </div>
+      <div field="send">  
+         <!--input id="send" name="send" type="submit" value="Save the test" /-->
+         <p class="button">
+            <a href="#" id="send" class="facebook-button" onclick="$('#testForm').submit();">
+            <span class="plus">{% if mode == 'tech' %}Save the network data{% else %}Back{% endif %}</span></a> 
+         </p>  
+      </div> 
+    </form>
+    {% endif %}
+    </section>

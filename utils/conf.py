@@ -1,4 +1,5 @@
 import os
+import fbappid_dev, fbappid_prod
 
 class Config(object):
     try:
@@ -129,13 +130,13 @@ class Config(object):
     if DEBUG:
         #Development FB App id and secret
         APP_NAMESPACE = 'rorschach_test_dev'
-        FBAPI_APP_ID = '223295151080625'
-        FBAPI_APP_SECRET = 'e4abb721b86a450e2ce866f1a7d8b1ce'
+        FBAPI_APP_ID = fbappid_dev.FBAPI_APP_ID
+        FBAPI_APP_SECRET = fbappid_dev.FBAPI_APP_SECRET
     else:
         #Production FB App id and secret
         APP_NAMESPACE = 'rorschach_test_platf'
-        FBAPI_APP_ID = '165208080240405'
-        FBAPI_APP_SECRET = '582c76c89b046135ee92231556882d3f'
+        FBAPI_APP_ID = fbappid_prod.FBAPI_APP_ID
+        FBAPI_APP_SECRET = fbappid_prod.FBAPI_APP_SECRET
         
     POST_TO_WALL = ("https://www.facebook.com/dialog/feed?redirect_uri=%s&"
                           "display=popup&app_id=%s" % (BASE_URL + 'static/pages/close.html', FBAPI_APP_ID))

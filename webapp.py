@@ -1,6 +1,6 @@
 import webapp2
 
-from pages import home, profile, sociologicalindex, network
+from pages import home, robots, profile, sociologicalindex, network
 from pages import pagetab, smallgraph, postwall
 from admin import admin, viewcreatetest, viewtestresults, vieweditnetwork, vieweditindex, downloadnetwork, downloadindex
 from utils import conf, computeprofileindex, networkleague, printnetwork
@@ -12,6 +12,7 @@ routes = []
 
 # Adding routes for pages rendering screens to the user
 routes.append(('/', home.MainPage));
+routes.append(('/robots.txt', robots.MainPage))
 routes.append(('/profile', profile.MainPage))
 routes.append(('/pagetab', pagetab.MainPage))
 routes.append(('/index/(\w+)/(\w+)', sociologicalindex.MainPage))

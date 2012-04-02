@@ -85,7 +85,7 @@ class MainPage(webapp2.RequestHandler):
                 'conf': conf,
                 'me': session['me'],
                 'cookie': printout,
-                'isdesktop': session['isdesktop'],
+                'isdesktop': session and session['isdesktop'] or False,
                 'header': '',
                 'code': self.request.get('code', None) }
         

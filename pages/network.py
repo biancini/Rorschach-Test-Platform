@@ -100,7 +100,7 @@ class MainPage(webapp2.RequestHandler):
             'league': league,
             'hiddenleague': hiddenleague,
             'friends': app_friends,
-            'isdesktop': session['isdesktop'],
+            'isdesktop': session and session['isdesktop'] or False,
             'header': 'network',
             'code': code }
 

@@ -148,7 +148,7 @@ def renderPage(self, mode='admin'):
             'uid': uid,
             'users': users,
             'index': index,
-            'isdesktop': session['isdesktop'],
+            'isdesktop': session and session['isdesktop'] or False,
             'header': '',
             'code': code }
         

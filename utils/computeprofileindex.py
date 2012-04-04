@@ -10,7 +10,6 @@ from google.appengine.ext import db
 from google.appengine.api import taskqueue
 from google.appengine.runtime import DeadlineExceededError
 from myexceptions import network_big
-from dateutil.relativedelta import relativedelta
 
 conf = conf.Config()
 
@@ -22,9 +21,9 @@ def getLibSNA(self, session):
     else: network = libsna.getusernetwork(uid)
     libSNA = libsna.SocialNetwork()
     
-    lastMonth = datetime.datetime.today() - relativedelta(months=1)
+    lastMonth = datetime.datetime.today() - datetime.timedelta(30)
     if network.updated_time <  lastMonth or network.getnodes() == None or network.getedges() == None:
-        logging.info("Reading network from Facebook")
+        logging.info("Reading network from Facebook.")
         nodes, edges = getNodesEdges(self, session)
         libSNA.loadGraph(nodes=nodes, edges=edges)
 
@@ -34,7 +33,6 @@ def getLibSNA(self, session):
         network.networkhash = h.hexdigest()
         network.setnodes(str(nodes))
         network.setedges(str(edges))
-        network.setleague(None)
         network.put()
     else:
         libSNA.loadGraph(nodes=network.getnodes(), edges=network.getedges())

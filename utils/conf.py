@@ -121,19 +121,19 @@ class Config(object):
                    connected between themselves and weakly connected to other nodes in the graph. This index represents the number of sub-groups
                    present in your Facebook network.'''}
     
-    BASE_URL = 'https://rorschach-test-platform.appspot.com/'
-    
     GOOGLE_APP_NAME = 'rorschach-test-platform'
     GOOGLE_CONSUMER_KEY = 'rorschach-test-platform.appspot.com'
     GOOGLE_CONSUMER_SECRET = 'vXLmDtq9t5ZC0Rub1DnBd1e4'
     
     if DEBUG:
         #Development FB App id and secret
+        BASE_URL = 'https://fuzzy.local:8080/'
         APP_NAMESPACE = 'rorschach_test_dev'
         FBAPI_APP_ID = fbappid_dev.FBAPI_APP_ID
         FBAPI_APP_SECRET = fbappid_dev.FBAPI_APP_SECRET
     else:
         #Production FB App id and secret
+        BASE_URL = 'https://rorschach-test-platform.appspot.com/'
         APP_NAMESPACE = 'rorschach_test_platf'
         FBAPI_APP_ID = fbappid_prod.FBAPI_APP_ID
         FBAPI_APP_SECRET = fbappid_prod.FBAPI_APP_SECRET

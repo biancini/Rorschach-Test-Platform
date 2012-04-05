@@ -166,7 +166,7 @@ class MainPage(webapp2.RequestHandler):
             'edgegaussian': edgegaussian,
             'value': value,
             'friends': app_friends,
-            'isdesktop': session['isdesktop'],
+            'isdesktop': session and session['isdesktop'] or False,
             'header': 'sociologicalindex',
             'code': code }
         

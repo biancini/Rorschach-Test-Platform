@@ -8,8 +8,8 @@
       </p>
       <div id="share-app">
         <ul>
-          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
-          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+          <li><a class="facebook-button" href="#" onclick="popup('{%autoescape off%}{{conf.POST_TO_WALL}}{%endautoescape%}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{%autoescape off%}{{conf.SEND_TO}}{%endautoescape%}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
         </ul>
       </div>
     </header>

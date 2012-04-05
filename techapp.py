@@ -2,7 +2,7 @@ import webapp2
 
 from utils import conf
 from cron import cronscript
-from admin import tech, vieweditnetwork, vieweditindex
+from admin import tech, dumpcookie, vieweditnetwork, vieweditindex
 
 conf = conf.Config()
 
@@ -15,6 +15,7 @@ routes.append(('/tech', tech.MainPage))
 routes.append(('/tech/cron/(.+)', cronscript.MainPage))
 
 # Adding routes for admin pages
+routes.append(('/tech/dumpcookie', dumpcookie.MainPage))
 routes.append(('/tech/viewnetwork', vieweditnetwork.MainEditPage))
 routes.append(('/tech/savenetwork', vieweditnetwork.PostHandler))
 routes.append(('/tech/viewindex', vieweditindex.MainEditPage))

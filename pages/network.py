@@ -46,22 +46,6 @@ class MainPage(webapp2.RequestHandler):
                 objreturn['edges'] = None
             
             self.response.out.write(json.dumps(objreturn))
-        elif code != None and action == 'postOnFriendWall':
-            frienduid = self.request.get('frienduid', None)
-            objreturn = {}
-            
-            objreturn['return'] = False
-            objreturn['message'] = 'Method not yet implemented'
-            self.response.out.write(json.dumps(objreturn))
-        elif code != None and action == 'sendMessageToFriend':
-            frienduid = self.request.get('frienduid', None)
-            objreturn = {}
-            
-            objreturn['return'] = False
-            objreturn['message'] = 'Method not yet implemented'
-            self.response.out.write(json.dumps(objreturn))
-        else:
-            self.response.out.write("Error, session invalid or invalid action.")
 
     def renderPage(self, uid):
         code = self.request.get('code', None)
@@ -112,7 +96,7 @@ class MainPage(webapp2.RequestHandler):
             'league': league,
             'hiddenleague': hiddenleague,
             'friends': app_friends,
-            'isdesktop': session['isdesktop'],
+            'isdesktop': session and session['isdesktop'] or False,
             'header': 'network',
             'code': code }
 

@@ -9,8 +9,8 @@
       </p>
       <div id="share-app">
         <ul>
-          <li><a class="facebook-button" href="#" onclick="popup('{{conf.POST_TO_WALL}}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
-          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{{conf.SEND_TO}}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
+          <li><a class="facebook-button" href="#" onclick="popup('{%autoescape off%}{{conf.POST_TO_WALL}}{%endautoescape%}', 'Post to Wall', 580, 400);"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="popup('{%autoescape off%}{{conf.SEND_TO}}{%endautoescape%}', 'Send', 580, 400);"><span class="speech-bubble">Send to Friends</span></a></li>
         </ul>
       </div>
     </header>
@@ -90,49 +90,13 @@
 	    }
 	    
 	    function postOnFriendWall(friendId) {
-	    	$.ajax({
-	          type : 'POST',
-	          url : '/network/{{uid}}',
-	          dataType : 'json',
-	          data: {
-	            code: '{{code}}',
-	            frienduid: friendId,
-	            action: 'postOnFriendWall'
-	          },
-	          success : function(data){
-  	            if (data.return) {
-  	              alert("Posted on your friend's wall.");
-  	            } else {
-  	              alert("Error while posting to user wall:\n" + data.message);
-  	            }
-	          },
-	          error : function(XMLHttpRequest, textStatus, errorThrown) {
-	            alert("Error while posting to user wall.");
-	          }
-	        });
+	    	description = 'Hey, you look to be one of the most significant friends in my Facebook network!\nCome and check how we relate on Rorschach Test Platform application!'
+	    	popup('{%autoescape off%}{{conf.POST_TO_WALL}}{%endautoescape%}&to=' + friendId + '&description=' + description, 'Post', 580, 400);
 	    }
 	    
 	    function sendMessageToFriend(friendId) {
-	    	$.ajax({
-	          type : 'POST',
-	          url : '/network/{{uid}}',
-	          dataType : 'json',
-	          data: {
-	            code: '{{code}}',
-	            frienduid: friendId,
-	            action: 'sendMessageToFriend'
-	          },
-	          success : function(data){
-	            if (data.return) {
-  	              alert("Message sent to your friend.");
-  	            } else {
-  	              alert("Error while sending message to your friend:\n" + data.message);
-  	            }
-	          },
-	          error : function(XMLHttpRequest, textStatus, errorThrown) {
-	            alert("Error while sending message to your friend.");
-	          }
-	        });
+	    	description = 'Hey, you look to be one of the most significant friends in my Facebook network!\nCome and check how we relate on Rorschach Test Platform application!'
+	    	popup('{%autoescape off%}{{conf.SEND_TO}}{%endautoescape%}&to=' + friendId + '&description=' + description, 'Send', 580, 400);
 	    }
       
         $('#friend').change(function() {

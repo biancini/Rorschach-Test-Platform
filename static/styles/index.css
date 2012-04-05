@@ -4,18 +4,19 @@ h2 {
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 20px;
-  line-height: 16px;
+  line-height: 18px;
 }
 
 a.disabled {
-	color: grey;
+  color: grey;
 }
 
 p {
-	font-size: 12px;
-	line-height: 14px;
-	text-align: justify;
+  font-size: 12px;
+  line-height: 14px;
+  text-align: justify;
 }
+
 p.title {
   font-weight: bold;
   margin-top: 12px;
@@ -67,12 +68,59 @@ p.title {
 	height: 15px;
 }
 
+.highlight {
+	background-color: #E9E9E9;
+}
+
+#contextmenu {
+	position: absolute;
+	display: none;
+	height: 40px;
+	width: 500px;
+}
+
+#contextmenu.textmenu {
+	display: table-cell;
+	margin-left: 5px;
+	padding-left: 5px;
+}
+
+.bracket {
+	font-size: 24px;
+	line-height: 24px;
+	color: #8B0000;
+	float: left;
+	height: 30px;
+	vertical-align: middle;
+	display: table-cell;
+}
+
 .picture {
+	align: center;
 	text-align: center;
 	vertical-align: bottom;
 	overflow: hidden;
 	padding-top: 5px;
 	padding-bottom: 5px;
+}
+
+.podiumpicdiv1 {
+	border: 1px solid #3B5998;
+	margin: auto;
+	display: table;
+	height: 120px;
+	width: 108px
+}
+
+.podiumpicdiv2 {
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.badge1st {
+	position: absolute;
+	margin-left: -21px;
+	margin-top: 90px;
 }
 
 .pavement {

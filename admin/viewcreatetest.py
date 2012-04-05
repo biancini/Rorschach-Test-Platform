@@ -1,5 +1,5 @@
 import webapp2
-import os
+import os.path
 import logging
 import datetime
 from obj import obj_test

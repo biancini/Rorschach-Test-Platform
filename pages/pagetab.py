@@ -1,5 +1,5 @@
 import webapp2
-import os
+import os.path
 
 from google.appengine.ext.webapp import template
 from utils import conf

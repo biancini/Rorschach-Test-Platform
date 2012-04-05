@@ -1,5 +1,5 @@
 import webapp2
-import os
+import os.path
 
 from utils import fbutils, conf, sessionmanager
 from google.appengine.ext.webapp import template

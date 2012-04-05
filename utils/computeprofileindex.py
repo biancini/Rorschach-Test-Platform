@@ -33,6 +33,7 @@ def getLibSNA(self, session):
         network.networkhash = h.hexdigest()
         network.setnodes(str(nodes))
         network.setedges(str(edges))
+        network.setleague(None)
         network.put()
     else:
         libSNA.loadGraph(nodes=network.getnodes(), edges=network.getedges())

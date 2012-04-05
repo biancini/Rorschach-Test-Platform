@@ -1,7 +1,7 @@
 import webapp2
-import os
 import re
 import json
+import os.path
 
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
@@ -22,8 +22,7 @@ class MainPage(webapp2.RequestHandler):
         action = self.request.get('action', None)
         if code != None and action == 'getFriendValues':
             objreturn = {}
-            q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1",
-                        frienduid)
+            q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", frienduid)
             networks  = q.fetch(1)
 
             if not len(networks) == 0:
@@ -47,6 +46,20 @@ class MainPage(webapp2.RequestHandler):
                 objreturn['edges'] = None
             
             self.response.out.write(json.dumps(objreturn))
+        elif code != None and action == 'postOnFriendWall':
+            frienduid = self.request.get('frienduid', None)
+            objreturn = {}
+            
+            objreturn['return'] = False
+            objreturn['message'] = 'Method not yet implemented'
+            self.response.out.write(json.dumps(objreturn))
+        elif code != None and action == 'sendMessageToFriend':
+            frienduid = self.request.get('frienduid', None)
+            objreturn = {}
+            
+            objreturn['return'] = False
+            objreturn['message'] = 'Method not yet implemented'
+            self.response.out.write(json.dumps(objreturn))
         else:
             self.response.out.write("Error, session invalid or invalid action.")
 
@@ -66,7 +79,6 @@ class MainPage(webapp2.RequestHandler):
         q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
         networks = q.fetch(1)
 
-        league = None
         if not len(networks) == 0:
             network = networks[0]
             

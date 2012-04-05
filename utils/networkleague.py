@@ -18,12 +18,14 @@ def computeLeague(libSNA, session):
     cs = sorted_map(c)
     bs = sorted_map(b)
     
+    weights = [.50, .30, .20]
+    
     names1 = [x[0] for x in ds[:10]]
     names2 = [x[0] for x in cs[:10]]
     names3 = [x[0] for x in bs[:10]]
     
     names = list(set(names1) | set(names2) | set(names3))
-    names = sorted(names, key = lambda name: d[name]/ds[0][1]*300 + c[name]/cs[0][1]*200 + b[name]/bs[0][1]*100, reverse = True)
+    names = sorted(names, key = lambda name: (float(d[name])/ds[0][1])*weights[0] + (float(c[name])/cs[0][1])*weights[1] + (float(b[name])/bs[0][1])*weights[2], reverse = True)
     
     result = fbutils.fql(
         "SELECT uid, name FROM user WHERE uid IN ( " \
@@ -32,7 +34,7 @@ def computeLeague(libSNA, session):
     
     nodes = {}
     for node in result:
-        nodes[str(node['uid'])] = node['name'] 
+        nodes[str(node['uid'])] = node['name']
     
     return [[name, nodes[name], str(d[name]), str(c[name]), str(b[name])] for name in names]
 

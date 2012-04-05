@@ -1,5 +1,5 @@
 import webapp2
-import os
+import os.path
 
 from obj import obj_testresults
 from utils import fbutils, conf, sessionmanager

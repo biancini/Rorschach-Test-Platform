@@ -1,7 +1,7 @@
 import webapp2
 import logging
 import time, datetime
-import os
+import os.path
 
 from obj import obj_user
 from utils import fbutils, conf, sessionmanager

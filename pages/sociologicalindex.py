@@ -1,5 +1,5 @@
 import webapp2
-import os
+import os.path
 import json
 import numpy as np
 

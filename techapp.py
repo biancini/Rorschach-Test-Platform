@@ -2,7 +2,7 @@ import webapp2
 
 from utils import conf
 from cron import cronscript
-from admin import tech, dumpcookie, vieweditnetwork, vieweditindex
+from admin import tech, vieweditnetwork, vieweditindex
 
 conf = conf.Config()
 
@@ -10,7 +10,6 @@ routes = []
 
 # Adding routes for pages rendering screens to the user
 routes.append(('/tech', tech.MainPage))
-routes.append(('/tech/dumpcookie', dumpcookie.MainPage))
 
 # Adding routes for technical pages for perform operations
 routes.append(('/tech/cron/(.+)', cronscript.MainPage))

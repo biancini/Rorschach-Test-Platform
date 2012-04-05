@@ -49,6 +49,92 @@
     
       <script language="javascript">
       <!--
+        function compareWithFriend(friendId) {
+          if ($('#comparediv').is(':hidden')) $('#comparediv').show('slow');
+        
+      	  $('#comparemessage').text('Retrieving ' + $('#friend option:selected').text() + '\'s network...');
+          $('#friendnodes').text('');
+          $('#friendedges').text('');
+          $('#friendelite').text('');
+          
+          $.ajax({
+	        type : 'POST',
+	        url : '/network/{{uid}}',
+	        dataType : 'json',
+	        data: {
+	          code: '{{code}}',
+	          frienduid: friendId,
+	          action: 'getFriendValues'
+	        },
+	        success : function(data){
+	          $('#comparemessage').text('');
+	          if (data.nodes == null || data.edges == null) {
+	            $('#comparemessage').text($('#friend option:selected').text() + " has not computed network information. Tell him/her to do it immediately!");
+	          }
+	          else {
+  	            $('#friendnodes').text($('#friend option:selected').text() + '\'s nodes: ' + data.nodes);
+	            $('#friendedges').text($('#friend option:selected').text() + '\'s edges: ' + data.edges);
+	            if (data.rank >= 0) {
+  	              if (data.rank == 0) {
+	                $('#friendelite').text("You do not appear in " + $('#friend option:selected').text() + "'s elite table!");
+	              } else {
+  	                $('#friendelite').text("You are the number " + data.rank + " in " + $('#friend option:selected').text() + "'s elite table!");
+	              }
+	            }
+              }
+	        },
+	        error : function(XMLHttpRequest, textStatus, errorThrown) {
+	          $('#comparemessage').text("Error while retrieving friends index value.");
+	        }
+	      });
+	    }
+	    
+	    function postOnFriendWall(friendId) {
+	    	$.ajax({
+	          type : 'POST',
+	          url : '/network/{{uid}}',
+	          dataType : 'json',
+	          data: {
+	            code: '{{code}}',
+	            frienduid: friendId,
+	            action: 'postOnFriendWall'
+	          },
+	          success : function(data){
+  	            if (data.return) {
+  	              alert("Posted on your friend's wall.");
+  	            } else {
+  	              alert("Error while posting to user wall:\n" + data.message);
+  	            }
+	          },
+	          error : function(XMLHttpRequest, textStatus, errorThrown) {
+	            alert("Error while posting to user wall.");
+	          }
+	        });
+	    }
+	    
+	    function sendMessageToFriend(friendId) {
+	    	$.ajax({
+	          type : 'POST',
+	          url : '/network/{{uid}}',
+	          dataType : 'json',
+	          data: {
+	            code: '{{code}}',
+	            frienduid: friendId,
+	            action: 'sendMessageToFriend'
+	          },
+	          success : function(data){
+	            if (data.return) {
+  	              alert("Message sent to your friend.");
+  	            } else {
+  	              alert("Error while sending message to your friend:\n" + data.message);
+  	            }
+	          },
+	          error : function(XMLHttpRequest, textStatus, errorThrown) {
+	            alert("Error while sending message to your friend.");
+	          }
+	        });
+	    }
+      
         $('#friend').change(function() {
           if ($('#friend option:selected').val() == "") {
             $('#comparemessage').text('');
@@ -57,41 +143,7 @@
             $('#friendelite').text('');
           }
           else {
-            $('#comparemessage').text('Retrieving ' + $('#friend option:selected').text() + '\'s network...');
-            $('#friendnodes').text('');
-            $('#friendedges').text('');
-            $('#friendelite').text('');
-            
-            $.ajax({
-	          type : 'POST',
-	          url : '/network/{{uid}}',
-	          dataType : 'json',
-	          data: {
-	             code: '{{code}}',
-	             frienduid: $('#friend option:selected').val(),
-	             action: 'getFriendValues'
-	          },
-	          success : function(data){
-	            $('#comparemessage').text('');
-	            if (data.nodes == null || data.edges == null) {
-	              $('#comparemessage').text($('#friend option:selected').text() + " has not computed network information. Tell him/her to do it immediately!");
-	            }
-	            else {
-	              $('#friendnodes').text($('#friend option:selected').text() + '\'s nodes: ' + data.nodes);
-	              $('#friendedges').text($('#friend option:selected').text() + '\'s edges: ' + data.edges);
-	              if (data.rank >= 0) {
-	                if (data.rank == 0) {
-	                  $('#friendelite').text("You do not appear in " + $('#friend option:selected').text() + "'s elite table!");
-	                } else {
-	                  $('#friendelite').text("You are the number " + data.rank + " in " + $('#friend option:selected').text() + "'s elite table!");
-	                }
-	              }
-                }
-	          },
-	          error : function(XMLHttpRequest, textStatus, errorThrown) {
-	            $('#comparemessage').text("Error while retrieving friends index value.");
-	          }
-	        });
+            compareWithFriend($('#friend option:selected').val());
           }
         });
       
@@ -112,9 +164,9 @@
           {% if not hiddenleague %}
           <table id="podium">
             <tr class="podiumimgrow">
-              <td rowspan="2" class="picture"><a href="http://www.facebook.com/profile.php?id={{league.1.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.1.0}}/picture?type=normal" alt="{{league.1.1}}" border="0" /></a></td>
-              <td class="picture"><a href="http://www.facebook.com/profile.php?id={{league.0.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.0.0}}/picture?type=normal" alt="{{league.0.1}}" border="0" /></a></td>
-              <td rowspan="3" class="picture"><a href="http://www.facebook.com/profile.php?id={{league.2.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.2.0}}/picture?type=normal" alt="{{league.2.1}}" border="0" /></a></td>
+              <td rowspan="2" class="picture"><div class="podiumpicdiv1"><div class="podiumpicdiv2"><a href="http://www.facebook.com/profile.php?id={{league.1.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.1.0}}/picture?type=normal" alt="{{league.1.1}}" border="0" /></a></div></div></td>
+              <td class="picture"><div class="podiumpicdiv1"><div class="podiumpicdiv2"><a href="http://www.facebook.com/profile.php?id={{league.0.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.0.0}}/picture?type=normal" alt="{{league.0.1}}" border="0" /></a></div><div class="badge1st"><img src="/static/images/ribbon_1st.png" /></div></div></td>
+              <td rowspan="3" class="picture"><div class="podiumpicdiv1"><div class="podiumpicdiv2"><a href="http://www.facebook.com/profile.php?id={{league.2.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.2.0}}/picture?type=normal" alt="{{league.2.1}}" border="0" /></a></div></div></td>
             </tr>
             <tr class="podiumrow"><td rowspan="3" class="pavement"><strong>1</strong></td></tr>
             <tr class="podiumrow"><td rowspan="2" class="pavement">2</td></tr>
@@ -125,9 +177,52 @@
           <table id="values" class="longvalues">
             <thead id="valueshead"><td>Ranking:</td><td>Name:</td><td>Degree:</td><td>Closeness:</td><td>Betweenness:</td></thead>
             {% for row in league %}
-            <tr><td>{{forloop.counter}}</td><td id="text">{% if not hiddenleague %}<a href="http://www.facebook.com/profile.php?id={{row.0}}" target="_blank">{% endif %}{{row.1}}{% if not hiddenleague %}</a>{% endif %}</td><td id="value">{{row.2}}</td><td id="value">{{row.3|formatfloat:'6'}}</td><td id="value">{{row.4|formatfloat:'6'}}</td></tr>
+            <tr><td>{{forloop.counter}}</td><td id="text">{% if not hiddenleague %}<a id="{{row.0}}" href="http://www.facebook.com/profile.php?id={{row.0}}" target="_blank">{% endif %}{{row.1}}{% if not hiddenleague %}</a>{% endif %}</td><td id="value">{{row.2}}</td><td id="value">{{row.3|formatfloat:'6'}}</td><td id="value">{{row.4|formatfloat:'6'}}</td></tr>
             {% endfor %}
           </table>
+          
+          <div id="contextmenu"><span class="bracket">&#123;</span><span class="textmenu"></span></div>
+          
+          {% if not hiddenleague %}
+          <script type="text/javascript">
+		  <!--
+		  $(function() {
+		    $("#values tr").hover(
+		     function() {
+		      if($(this).find("td").eq(0).text() == $("#values").find("td").eq(0).text()) return;
+		     
+		      $(this).addClass("highlight");
+		      
+		      var friendName = $(this).find("td").eq(1).text();
+		      var friendId = $(this).find("td").eq(1).find("a:first").attr("id");
+		      
+		      var htmlText = "Interact with <strong>" + friendName + "</strong> about his/her ranking in your league!<br/>";
+		          htmlText += "<a id='hovercompare' href='#' onclick=\"compareWithFriend('" + friendId + "'); return false;\">Compare networks</a> | ";
+		          htmlText += "<a id='hoverpost' href='#' onclick=\"postOnFriendWall('" + friendId + "'); return false;\">Post on friend's wall</a> | ";
+		          htmlText += "<a id='hoversend' href='#' onclick=\"sendMessageToFriend('" + friendId + "'); return false;\">Send a message</a>";
+		      $("#contextmenu").find("span").eq(1).html(htmlText);
+		      
+		      var pos = $(this).position();
+    		  var width = $(this).outerWidth();
+    		  
+		      $("#contextmenu").css({
+        		position: "absolute",
+        		top: (pos.top - 8) + "px",
+        		left: (pos.left + width + 10) + "px" }).show();
+		     },
+		     function() {
+		      $(this).removeClass("highlight");
+		     });
+		   })
+		  $(function() {
+		    $("#contextmenu").mouseleave(
+		     function() {
+		      $("#contextmenu").hide();
+		     });
+		   })
+		  //-->
+		  </script>
+          {% endif %}
 	    </p>
 	    {% else %}
 	    <span id="friendelite" style="visiblity: hidden"></span>

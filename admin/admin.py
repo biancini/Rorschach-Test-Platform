@@ -1,5 +1,5 @@
 import webapp2
-import os
+import os.path
 from datetime import date
 
 from utils import fbutils, conf, sessionmanager

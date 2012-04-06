@@ -160,10 +160,10 @@
 		      var friendName = $(this).find("td").eq(1).text();
 		      var friendId = $(this).find("td").eq(1).find("a:first").attr("id");
 		      
-		      var htmlText = "Interact with <strong>" + friendName + "</strong> about his/her ranking in your league!<br/>";
-		          htmlText += "<a id='hovercompare' href='#' onclick=\"compareWithFriend('" + friendId + "'); return false;\">Compare networks</a> | ";
-		          htmlText += "<a id='hoverpost' href='#' onclick=\"postOnFriendWall('" + friendId + "'); return false;\">Post on friend's wall</a> | ";
-		          htmlText += "<a id='hoversend' href='#' onclick=\"sendMessageToFriend('" + friendId + "'); return false;\">Send a message</a>";
+		      var htmlText = "Interact with <strong>" + friendName + "</strong>!<br/>";
+		          htmlText += "<a id='hovercompare' href='#' onclick=\"compareWithFriend('" + friendId + "'); return false;\">Compare</a> | ";
+		          htmlText += "<a id='hoverpost' href='#' onclick=\"postOnFriendWall('" + friendId + "'); return false;\">Post on Wall</a> | ";
+		          htmlText += "<a id='hoversend' href='#' onclick=\"sendMessageToFriend('" + friendId + "'); return false;\">Send Message</a>";
 		      $("#contextmenu").find("span").eq(1).html(htmlText);
 		      
 		      var pos = $(this).position();

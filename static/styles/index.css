@@ -38,17 +38,17 @@ p.title {
   display: none;
 }
 
-#comparediv {
+#comparisonchart {
+	display: none;
+	width: 500px;
+	height: 250px;
+}
+
+#comparediv, #comparisonresult {
   display: none;
 }
 
-#friendvalue, #friendnodes, #friendedges {
-  font-style: italic;
-  color: #db3811;
-}
-
-#friendelite {
-  font-weight: normal;
+#friendvalue, #friendnodes, #friendedges, .myname {
   font-style: italic;
   color: #db3811;
 }
@@ -68,7 +68,7 @@ p.title {
 	height: 15px;
 }
 
-.highlight {
+.highlight, td.grey {
 	background-color: #E9E9E9;
 }
 
@@ -132,14 +132,14 @@ p.title {
 	font-style: italic;
 }
 
-#values.longvalues {
+.longvalues {
   font-size: 12px;
   line-height: 12px;
   border: 1px solid #e9e9e9;
   color: #25383C;
 }
 
-#valueshead {
+.valueshead {
   font-weight: bold;
   text-align: center;
   border: 1px solid #e9e9e9;

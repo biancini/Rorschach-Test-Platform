@@ -42,10 +42,11 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 	<script type="text/javascript" src="/static/scripts/jquery.sparkline.js"></script>
-	{% if header == 'viewcreatetest' %}
+	{% if header == 'viewcreatetest' or header == 'network' %}
 	<link href="/static/styles/jquery-ui-1.8.17.custom.css" media="screen" rel="stylesheet"  />
 	<script type="text/javascript" src="/static/scripts/testvalidation.js"></script>
 	<script type="text/javascript" src="/static/scripts/jquery-ui-1.8.17.custom.min.js"></script>
+	<script type="text/javascript" src="/static/scripts/jquery.jsPlumb-1.3.8-all-min.js"></script>
 	{% endif %}
 	
 	<script type="text/javascript">

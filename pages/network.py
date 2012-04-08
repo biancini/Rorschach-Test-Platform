@@ -23,27 +23,22 @@ class MainPage(webapp2.RequestHandler):
         if code != None and action == 'getFriendValues':
             objreturn = {}
             q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", frienduid)
+            #q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
             networks  = q.fetch(1)
 
             if not len(networks) == 0:
                 network = networks[0]
                 league = network.getleague()
                 
-                rank = -1
-                if league != None:
-                    i = 1 
-                    rank= 0
-                    for row in league:
-                        if row[0] == uid: rank = i
-                        i += 1
-                    
-                objreturn['rank'] = rank
                 objreturn['nodes'] = len(network.getnodes())
                 objreturn['edges'] = len(network.getedges())
+                objreturn['friendleagueids'] = league and [row[0] for row in league] or None
+                objreturn['friendleaguenames'] = league and [row[1] for row in league] or None
             else:
-                objreturn['rank'] = None
                 objreturn['nodes'] = None
                 objreturn['edges'] = None
+                objreturn['friendleagueids'] = None
+                objreturn['friendleaguenames'] = None
             
             self.response.out.write(json.dumps(objreturn))
 
@@ -91,6 +86,7 @@ class MainPage(webapp2.RequestHandler):
         template_values = {
             'conf': conf,
             'uid': uid,
+            'me': session['me'],
             'nodes': nodes,
             'edges': edges,
             'league': league,

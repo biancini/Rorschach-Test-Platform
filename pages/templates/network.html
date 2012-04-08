@@ -30,14 +30,16 @@
     <section id="normalsection" class="clearfix">
       <p class="title">The network has the following characteristics:</p>
       {% if not nodes == None and not edges == None %}
-      <p>Network nodes number: {{nodes|length}} <span id="friendnodes"></span></p>
-      <p>Network edges number: {{edges|length}} <span id="friendedges"></span></p>
+      <table style="width: 500px; border: 0px; margin: 0px; padding; 0px">
+      <tr><td>Network nodes number: {{nodes|length}}</td><td align="right"><span id="friendnodes"></span></td>
+      <tr><td>Network edges number: {{edges|length}}</td><td align="right"><span id="friendedges"></span></td>
+      </table>
       {% if not code == None and friends != None and friends|length > 0  %}
       <p>&nbsp;</p>
       
       <p><a id="comparelink" href="#">Compare your network with one of your friends</a></p>
       
-      <div id ="comparediv">
+      <div id="comparediv">
         <p>Select the friend from the dropdown list:
         <select id="friend" name="friend">
           <option value=""></option>
@@ -45,17 +47,45 @@
           <option value="{{friend.uid}}">{{friend.name}}</option>
           {% endfor %}
         </select> <span id="comparemessage"/></p>
+        
+        <div id="comparisonchart"></div>
+        <div id="comparisonresult"></div>
       </div>
     
       <script language="javascript">
       <!--
-        function compareWithFriend(friendId) {
+      	jsPlumb.bind("ready", function() {
+      		drawConnections();
+      	});
+      
+        google.load("visualization", "1", {packages:["corechart"]});
+      
+        function drawConnections() {
+        	jsPlumb.removeEveryEndpoint();
+        	
+      		jsPlumb.importDefaults({
+      		  Connector: [ "Bezier", { curviness: 50 } ],
+      		  Anchors: [ "RightMiddle", "LeftMiddle" ],
+      		  PaintStyle: { lineWidth: 1, strokeStyle:"#3B5998" },
+      		  Endpoint: [ "Dot", { radius:1 } ]
+      		});
+      		
+      		{% for row in league %}
+      		try { jsPlumb.connect({ source:'m_{{row.0}}', target:'f_{{row.0}}', container:$("#comparisonresult") }); } catch (err) { }
+	    	{% endfor %}
+        }
+        
+        function compareWithFriend(friendId, friendName) {
           if ($('#comparediv').is(':hidden')) $('#comparediv').show('slow');
         
-      	  $('#comparemessage').text('Retrieving ' + $('#friend option:selected').text() + '\'s network...');
+          if (friendName == null) { friendName = $('#friend option:selected').text(); }
+          else { $("#friend option[value='" + friendId + "']").attr('selected','selected');  }
+          
+      	  $('#comparemessage').text('Retrieving ' + friendName + '\'s network...');
           $('#friendnodes').text('');
           $('#friendedges').text('');
-          $('#friendelite').text('');
+          if (!$('#comparisonchart').is(':hidden')) $('#comparisonchart').hide();
+          if (!$('#comparisonresult').is(':hidden')) $('#comparisonresult').hide();
           
           $.ajax({
 	        type : 'POST',
@@ -69,18 +99,57 @@
 	        success : function(data){
 	          $('#comparemessage').text('');
 	          if (data.nodes == null || data.edges == null) {
-	            $('#comparemessage').text($('#friend option:selected').text() + " has not computed network information. Tell him/her to do it immediately!");
+	            $('#comparemessage').html(friendName + " has not computed network information. <a href=\"#\" onclick=\"sendMessageToFriend('" + friendId + "', false); return false;\">Tell him/her to do it immediately</a>!");
 	          }
 	          else {
-  	            $('#friendnodes').text($('#friend option:selected').text() + '\'s nodes: ' + data.nodes);
-	            $('#friendedges').text($('#friend option:selected').text() + '\'s edges: ' + data.edges);
-	            if (data.rank >= 0) {
-  	              if (data.rank == 0) {
-	                $('#friendelite').text("You do not appear in " + $('#friend option:selected').text() + "'s elite table!");
-	              } else {
-  	                $('#friendelite').text("You are the number " + data.rank + " in " + $('#friend option:selected').text() + "'s elite table!");
-	              }
+  	            $('#friendnodes').text(friendName + '\'s nodes: ' + data.nodes);
+	            $('#friendedges').text(friendName + '\'s edges: ' + data.edges);
+	            
+	            {% if not hiddenleague %}
+	            if ($('#comparisonchart').is(':hidden')) $('#comparisonchart').show();
+	            drawComparisonChart(friendId, friendName, data.nodes, data.edges);
+	            
+	            if (data.friendleagueids != null && data.friendleaguenames != null) {
+		            if ($('#comparisonresult').is(':hidden')) $('#comparisonresult').show();
+		            
+		            var leagueids = new Array();
+		            var leaguenames = new Array();
+		            {% for row in league %}
+		            leagueids[{{forloop.counter}}-1] = '{{row.0}}';
+		            leaguenames[{{forloop.counter}}-1] = '{{row.1}}';
+		            {% endfor %}
+		            
+		            var tableHtml  = '<table width="500" class="longvalues" id="comparisontable">';
+		                tableHtml += '<tr class="valueshead"><td colspan="2">Your network</td><td style="width:100px">&nbsp;</td><td colspan="2">Friend\'s network</td></tr>';
+		                tableHtml += '<tr class="valueshead"><td>Ranking:</td><td>Name:</td><td>&nbsp;</td><td>Ranking:</td><td>Name:</td></tr>';
+		            
+		            var lastrow = Math.max(leagueids.length, data.friendleagueids.length);
+	                for (var i = 0; i < lastrow; i++) {
+	                	tableHtml += '<tr>';
+	                	
+	                	var styleRow = '';
+	                	if (i < leagueids.length) {
+	                		if (data.friendleagueids.indexOf(leagueids[i]) != -1) styleRow = ' class="grey"';
+	                		if (leagueids[i] == friendId) { tableHtml += '<td class="myname">' + (i+1) + '</td><td class="myname" id="text"><div id="m_' + leagueids[i] + '">' + leaguenames[i] + '</div></td>'; }
+		                	else { tableHtml += '<td' + styleRow + '>' + (i+1) + '</td><td id="text"' + styleRow + '><div id="m_' + leagueids[i] + '">' + leaguenames[i] + '</div></td>'; }
+	                	} else { tableHtml += '<td>&nbsp;</td><td id="text">&nbsp;</td>'; } 
+	                	tableHtml += '<td>&nbsp;</td>';
+	                	
+	                	styleRow = '';
+	                	if (i < data.friendleagueids.length) {
+	                	  if (leagueids.indexOf(data.friendleagueids[i]) != -1) styleRow = ' class="grey"';
+	                	  if (data.friendleagueids[i] == '{{uid}}') { tableHtml += '<td class="myname"><div id="f_' + data.friendleagueids[i] + '">' + (i+1) + '</div></td><td id="text" class="myname">' + data.friendleaguenames[i] + '</td>'; }
+	                	  else { tableHtml += '<td' + styleRow + '><div id="f_' + data.friendleagueids[i] + '">' + (i+1) + '</div></td><td id="text"' + styleRow + '>' + data.friendleaguenames[i] + '</td>'; } }
+	                	else { tableHtml += '<td>&nbsp;</td><td id="text">&nbsp;</td>'; } 
+	                	
+	                	tableHtml += '</tr>';
+	                }
+	                
+	                tableHtml += '</table>';
+		            $('#comparisonresult').html(tableHtml);
+		            drawConnections();
 	            }
+	            {% endif %}
               }
 	        },
 	        error : function(XMLHttpRequest, textStatus, errorThrown) {
@@ -88,14 +157,43 @@
 	        }
 	      });
 	    }
+        
+        function drawComparisonChart(friendId, friendName, friendNodes, friendEdges) {
+        	var data = new google.visualization.DataTable();
+            data.addColumn('string', 'ID');
+            data.addColumn('number', 'Person');
+            data.addColumn('number', 'Number of nodes');
+            data.addColumn('string', 'Person Name');
+            data.addColumn('number', 'Number of edges');
+            data.addRows([
+              ['', 1, {{nodes|length}}, '{{me.name}}', {{edges|length}}],
+              ['', 3, friendNodes, friendName, friendEdges],
+            ]);
+            
+            var maxFriends = Math.max({{nodes|length}}, friendNodes);
+            var options = {
+               width: 500, height: 250,
+               title: 'Comparison of networks',
+               hAxis: {title: 'Person', minValue: 0, maxValue: 3, textStyle: {fontSize: 1}},
+               vAxis: {title: 'Number of friends', minValue: 0, maxValue: parseInt(maxFriends*1.3)},
+               sizeAxis: {minValue: 0},
+               bubble: {textStyle: {fontSize: 10}},
+               legend: {position: 'bottom'}
+             };
+
+             var chart = new google.visualization.BubbleChart(document.getElementById('comparisonchart'));
+             chart.draw(data, options);
+        }
 	    
-	    function postOnFriendWall(friendId) {
-	    	description = 'Hey, you look to be one of the most significant friends in my Facebook network!\nCome and check how we relate on Rorschach Test Platform application!'
+	    function postOnFriendWall(friendId, alreadyComputed) {
+	    	if (alreadyComputed) description = 'Hey, you look to be one of the most significant friends in my Facebook network! Come and check how we relate on Rorschach Test Platform application!';
+	    	else description = 'Hey, have you ever heard bout Rorschach Test Platform? You can use this application to check who are the most significant friends in your Facebook network!';
 	    	popup('{%autoescape off%}{{conf.POST_TO_WALL}}{%endautoescape%}&to=' + friendId + '&description=' + description, 'Post', 580, 400);
 	    }
 	    
-	    function sendMessageToFriend(friendId) {
-	    	description = 'Hey, you look to be one of the most significant friends in my Facebook network!\nCome and check how we relate on Rorschach Test Platform application!'
+	    function sendMessageToFriend(friendId, alreadyComputed) {
+	    	if (alreadyComputed) description = 'Hey, you look to be one of the most significant friends in my Facebook network! Come and check how we relate on Rorschach Test Platform application!';
+	    	else description = 'Hey, have you ever heard bout Rorschach Test Platform? You can use this application to check who are the most significant friends in your Facebook network!';
 	    	popup('{%autoescape off%}{{conf.SEND_TO}}{%endautoescape%}&to=' + friendId + '&description=' + description, 'Send', 580, 400);
 	    }
       
@@ -104,10 +202,11 @@
             $('#comparemessage').text('');
             $('#friendnodes').text('');
             $('#friendedges').text('');
-            $('#friendelite').text('');
+            if (!$('#comparisonchart').is(':hidden')) $('#comparisonchart').hide();
+	        if (!$('#comparisonresult').is(':hidden')) $('#comparisonresult').hide();
           }
           else {
-            compareWithFriend($('#friend option:selected').val());
+            compareWithFriend($('#friend option:selected').val(), null);
           }
         });
       
@@ -124,7 +223,7 @@
       {% endif %}
         {% if not league == None %}
         <p>&nbsp;</p>
-        <p class="title">Elite group of the network:<span id="friendelite"></span>
+        <p class="title">Elite group of the network:
           {% if not hiddenleague %}
           <table id="podium">
             <tr class="podiumimgrow">
@@ -139,7 +238,7 @@
           {% endif %}
         
           <table id="values" class="longvalues">
-            <thead id="valueshead"><td>Ranking:</td><td>Name:</td><td>Degree:</td><td>Closeness:</td><td>Betweenness:</td></thead>
+            <thead class="valueshead"><td>Ranking:</td><td>Name:</td><td>Degree:</td><td>Closeness:</td><td>Betweenness:</td></thead>
             {% for row in league %}
             <tr><td>{{forloop.counter}}</td><td id="text">{% if not hiddenleague %}<a id="{{row.0}}" href="http://www.facebook.com/profile.php?id={{row.0}}" target="_blank">{% endif %}{{row.1}}{% if not hiddenleague %}</a>{% endif %}</td><td id="value">{{row.2}}</td><td id="value">{{row.3|formatfloat:'6'}}</td><td id="value">{{row.4|formatfloat:'6'}}</td></tr>
             {% endfor %}
@@ -161,9 +260,9 @@
 		      var friendId = $(this).find("td").eq(1).find("a:first").attr("id");
 		      
 		      var htmlText = "Interact with <strong>" + friendName + "</strong>!<br/>";
-		          htmlText += "<a id='hovercompare' href='#' onclick=\"compareWithFriend('" + friendId + "'); return false;\">Compare</a> | ";
-		          htmlText += "<a id='hoverpost' href='#' onclick=\"postOnFriendWall('" + friendId + "'); return false;\">Post on Wall</a> | ";
-		          htmlText += "<a id='hoversend' href='#' onclick=\"sendMessageToFriend('" + friendId + "'); return false;\">Send Message</a>";
+		          htmlText += "<a id='hovercompare' href='#' onclick=\"compareWithFriend('" + friendId + "', '" + friendName + "'); return false;\">Compare</a> | ";
+		          htmlText += "<a id='hoverpost' href='#' onclick=\"postOnFriendWall('" + friendId + "', true); return false;\">Post on Wall</a> | ";
+		          htmlText += "<a id='hoversend' href='#' onclick=\"sendMessageToFriend('" + friendId + "', true); return false;\">Send Message</a>";
 		      $("#contextmenu").find("span").eq(1).html(htmlText);
 		      
 		      var pos = $(this).position();
@@ -188,8 +287,6 @@
 		  </script>
           {% endif %}
 	    </p>
-	    {% else %}
-	    <span id="friendelite" style="visiblity: hidden"></span>
 	    {% endif %}
 	  {% else %}
 	  <p>At least one index value must be calculated in order to have the network computed and visible here.</p>

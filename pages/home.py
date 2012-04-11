@@ -7,6 +7,7 @@ from obj import obj_user
 from utils import fbutils, conf, sessionmanager
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
+from google.appengine.api import memcache
 
 conf = conf.Config()
 

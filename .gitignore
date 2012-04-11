@@ -1,0 +1,6 @@
+.project
+.pydevproject
+utils/fbappid_dev.py
+utils/fbappid_prod.py
+*.pyc
+*.po

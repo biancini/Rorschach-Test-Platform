@@ -7,10 +7,8 @@ from obj import obj_user
 from utils import fbutils, conf, sessionmanager
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
-from google.appengine.api import memcache
 
 conf = conf.Config()
-cache = memcache.Client()
 
 class MainPage(webapp2.RequestHandler):
     def renderPage(self):
@@ -68,16 +66,12 @@ class MainPage(webapp2.RequestHandler):
                    not index.name in indexes:
                     indexes.append(index.name)
             
-            tests = cache.get("tests")
-            if tests == None:
-                tests = []
-                q = db.GqlQuery("SELECT * FROM Test")
-            
-                for test in q:
-                    if test.active and datetime.date.today() >= test.startdate and datetime.date.today() <= test.enddate:
-                        tests.append(test)
-                
-                cache.add("tests", tests)
+            tests = []
+            q = db.GqlQuery("SELECT * FROM Test")
+        
+            for test in q:
+                if test.active and datetime.date.today() >= test.startdate and datetime.date.today() <= test.enddate:
+                    tests.append(test)
 
             template_values = {
                 'appId': conf.FBAPI_APP_ID,

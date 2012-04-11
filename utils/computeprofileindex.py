@@ -10,8 +10,10 @@ from google.appengine.ext import db
 from google.appengine.api import taskqueue
 from google.appengine.runtime import DeadlineExceededError
 from myexceptions import network_big
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 def getLibSNA(self, session):
     uid = self.request.get('id', None)
@@ -40,10 +42,10 @@ def getLibSNA(self, session):
     
     logging.info("nodes:%s" %libSNA.graph.number_of_nodes())
     
-    cache = {}
-    cache['networkhash'] = network.networkhash
-    cache['uid'] = uid
-    libSNA.cache = cache
+    datacache = {}
+    datacache['networkhash'] = network.networkhash
+    datacache['uid'] = uid
+    libSNA.cache = datacache
         
     if network.getleague() == None:
         logging.info('Computation of network league sent to backend backend-indexes.')
@@ -58,17 +60,31 @@ def getLibSNA(self, session):
 def computeIndex(self, libSNA, indexname, backend, session, saveInDatastore=True):
     objreturn = {}
     uid = self.request.get('id', None)
-    if uid == None: uid = self.request.get('uid', None) 
+    if uid == None: uid = self.request.get('uid', None)
     
-    q = db.GqlQuery("SELECT * FROM Index " +
-                    "WHERE uid = :1 AND name = :2 " +
-                    "ORDER BY updated_time DESC",
-                    uid, indexname)
-    index = q.fetch(1)
+    indexes = cache.get("%s_indexes" % session['me']['id'])
+    if indexes == None:
+        indexes = {}
+        q = db.GqlQuery("SELECT * FROM Index " +
+                        "WHERE uid = :1 " +
+                        "ORDER BY updated_time DESC",
+                        session['me']['id'])
     
-    if len(index) > 0 and libSNA.cache['networkhash'] == index[0].networkhash and not index[0].value == None:
+        for index in q:            
+            if not index.networkhash == None and \
+            not index.value == None and \
+            not index.name in indexes.keys():
+                indexes[index.name] = index.name
+                
+        cache.add("%s_indexes" % session['me']['id'], indexes, 60*60)
+    
+    index = None
+    for curindex in indexes.values():
+        if curindex.name == indexname: index = curindex
+    
+    if index and libSNA.cache['networkhash'] == index.networkhash and not index.value == None:
         objreturn['error'] = False
-        objreturn['msg'] = ('The (already) computed index for ' + indexname + ' is ' + conf.INDEX_TYPES[indexname] + '.') % index[0].value
+        objreturn['msg'] = ('The (already) computed index for ' + indexname + ' is ' + conf.INDEX_TYPES[indexname] + '.') % index.value
         return objreturn
     
     del index
@@ -116,6 +132,7 @@ def computeIndex(self, libSNA, indexname, backend, session, saveInDatastore=True
                 if not edges == None: index.set_edgevalues(edges)
                 if not nodes == None: index.set_nodevalues(nodes)
                 index.put()
+                cache.delete("%s_indexes" % session['me']['id'])
 
     except network_big.NetworkTooBigException as ex:
         logging.info('Computation of ' + indexname + ' sent to backend backend-indexes.')
@@ -251,3 +268,4 @@ class MainPage(webapp2.RequestHandler):
 
     def post(self):
         self.renderPage()
+    

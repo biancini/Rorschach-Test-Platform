@@ -3,8 +3,10 @@ import networkx as nx
 
 from google.appengine.ext import db
 from utils import conf, sessionmanager
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 def loadGraph(nodes, edges):
     graph = nx.Graph()
@@ -25,11 +27,16 @@ class MainPage(webapp2.RequestHandler):
         if not uid == None and extension in supported_extensions:
             session = sessionmanager.getsession(self)
             if session and session['me']['id'] == uid: 
-                q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
-                networks = q.fetch(1)
+                network = cache.get("%s_network" % uid)
+                if network == None:
+                    q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
+                    network = q.fetch(1)
+                    if len(network) == 0: network = None
+                    else:
+                        network = network[0]
+                        cache.add("%s_network" % uid, network, 60*60)
         
-                if not len(networks) == 0:
-                    network = networks[0]
+                if network == 0:
                     graph = loadGraph(network.getnodes(), network.getedges())
                     
                     strpage = ''

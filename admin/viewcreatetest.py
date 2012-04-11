@@ -7,8 +7,10 @@ from obj import obj_test
 from utils import fbutils, conf, sessionmanager
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 class ActiveHandler(webapp2.RequestHandler):
     def get(self):
@@ -24,15 +26,33 @@ class ActiveHandler(webapp2.RequestHandler):
             testid = self.request.get('testid', None)
             active = self.request.get('active', False) == "true"
             
-            q = db.GqlQuery("SELECT * FROM Test WHERE testid = :1", testid)
-            test = q.fetch(1)
-
-            if len(test) > 0: test = test[0]
-            else: test = None
+            tests = cache.get("tests")
+            if tests:
+                test = None
+                for curtest in tests:
+                    if curtest.testid == testid:
+                        test = curtest
+                
+            else:
+                tests = cache.get("tests")
+                if tests:
+                    test = None
+                    for curtest in tests:
+                        if curtest.testid == testid:
+                            test = curtest
+                    
+                else:
+                    q = db.GqlQuery("SELECT * FROM Test WHERE testid = :1", testid)
+                    test = q.fetch(1)
+    
+                    if len(test) > 0: test = test[0]
+                    else: test = None
             
             if test:
                 test.active = active
                 test.put()
+                cache.delete("tests")
+                
                 if (active): logging.info("Activated the psychological test: " + testid)
                 else: logging.info("Deactivated the psychological test: " + testid)
                 
@@ -51,11 +71,19 @@ class DelHandler(webapp2.RequestHandler):
             code = self.request.get('code', None)
             testid = self.request.get('testid', None)
             
-            q = db.GqlQuery("SELECT * FROM Test WHERE testid = :1", testid)
-            test = q.fetch(1)
+            tests = cache.get("tests")
+            if tests:
+                test = None
+                for curtest in tests:
+                    if curtest.testid == testid:
+                        test = curtest
+                
+            else:
+                q = db.GqlQuery("SELECT * FROM Test WHERE testid = :1", testid)
+                test = q.fetch(1)
 
-            if len(test) > 0: test = test[0]
-            else: test = None
+                if len(test) > 0: test = test[0]
+                else: test = None
             
             if test:
                 if test.owner != session['me']['id']:
@@ -95,10 +123,21 @@ class PostHandler(webapp2.RequestHandler):
                 testid = str(datetime.datetime.now()) + " " + session['me']['id']
                 test = obj_test.Test(testid=testid, name=testname)
             else:
-                q = db.GqlQuery("SELECT * FROM Test WHERE testid = :1", testid)
-                test = q.fetch(1)
+                tests = cache.get("tests")
+                if tests:
+                    test = None
+                    for curtest in tests:
+                        if curtest.testid == testid:
+                            test = curtest
+                    
+                else:
+                    q = db.GqlQuery("SELECT * FROM Test WHERE testid = :1", testid)
+                    test = q.fetch(1)
+    
+                    if len(test) > 0: test = test[0]
+                    else: test = None
 
-                if len(test) == 0:
+                if not test:
                     testid = str(datetime.datetime.now()) + " " + session['me']['id']
                     test = obj_test.Test(testid=testid, name=testname)
                 else:
@@ -118,6 +157,7 @@ class PostHandler(webapp2.RequestHandler):
                 test.testfilename = testfilename
                 test.testfile = db.Blob(testfile)
             test.put()
+            cache.delete("tests")
 
             logging.info("Uploaded a new psychological test: " + testid)
             #self.redirect('/admin/edittest?testid=' + testid + '&code=' + code)

@@ -1,9 +1,11 @@
 import webapp2
 
 from google.appengine.ext import db
+from google.appengine.api import memcache
 from utils import fbutils, conf, sessionmanager
 
 conf = conf.Config()
+cache = memcache.Client()
 
 class MainPage(webapp2.RequestHandler):
     def renderPage(self):
@@ -13,11 +15,18 @@ class MainPage(webapp2.RequestHandler):
             
         if session:
             testid = self.request.get('testid')
-            q = db.GqlQuery("SELECT * FROM Test WHERE testid = :1", testid)
-            
-            tests = q.fetch(1)
-            if len(tests) > 0:
-                test = tests[0]
+            tests = cache.get("tests")
+            if tests:
+                test = None
+                for curtest in tests:
+                    if curtest.testid == testid: test = curtest
+                
+            else:
+                q = db.GqlQuery("SELECT * FROM Test WHERE testid = :1", testid)
+                test = q.fetch(1)
+    
+                if len(test) > 0: test = test[0]
+                else: test = None
             
             self.response.headers['Content-Type'] = "application/x-gzip"
             self.response.headers['Content-Disposition'] = "attachment; filename=" + str(test.testfilename)

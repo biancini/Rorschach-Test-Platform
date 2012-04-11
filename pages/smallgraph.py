@@ -4,8 +4,10 @@ import numpy as np
 from google.appengine.api import urlfetch
 from google.appengine.ext import db
 from utils import conf
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 def smallgraph_image(nodevalues, edgevalues):
     if nodevalues != None:
@@ -82,16 +84,29 @@ class MainPage(webapp2.RequestHandler):
         
         nodevalues = None
         edgevalues = None
-                
-        q = db.GqlQuery("SELECT * FROM Index " +"WHERE uid = :1 AND name = :2 " +
-                "ORDER BY updated_time DESC",
-                uid,
-                indexname)
-        indexes = q.fetch(1)
+        
+        indexes = cache.get("%s_indexes" % uid)
+        if indexes == None:
+            indexes = {}
+            q = db.GqlQuery("SELECT * FROM Index " +
+                            "WHERE uid = :1 " +
+                            "ORDER BY updated_time DESC",
+                            uid)
+        
+            for index in q:            
+                if not index.networkhash == None and \
+                not index.value == None and \
+                not index.name in indexes.keys():
+                    indexes[index.name] = index
+                    
+            cache.add("%s_indexes" % uid, indexes, 60*60)
+        
+        index = None
+        for curindex in indexes.values():
+            if curindex.name == indexname:
+                index = curindex
 
-        if not len(indexes) == 0:
-            index = indexes[0]
-            
+        if index:
             nodevalues = self.setcentiles(index.get_nodevalues())
             edgevalues = self.setcentiles(index.get_edgevalues())
 

@@ -3,9 +3,12 @@ import json
 
 from datetime import date
 from google.appengine.ext import db
+from google.appengine.api import memcache
+
 from utils import fbutils, conf, sessionmanager
 
 conf = conf.Config()
+cache = memcache.Client()
 
 class MainPage(webapp2.RequestHandler):
     def renderPage(self):
@@ -22,8 +25,14 @@ class MainPage(webapp2.RequestHandler):
                 objreturn['message'] = 'Wrong role, you are not administrator'
             else:
                 objreturn['tests'] = []
-                q = db.GqlQuery("SELECT * FROM Test")
-                for test in q:
+                tests = cache.get("tests")
+                if tests == None:
+                    tests = []
+                    q = db.GqlQuery("SELECT * FROM Test")
+                    for test in q: tests.append(test)
+                    cache.add("tests", tests)
+                
+                for test in tests:
                     if test != None and test.startdate != None and test.enddate != None:
                         curTest = {}
                         curTest['testid'] = test.testid

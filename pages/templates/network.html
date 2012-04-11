@@ -260,9 +260,15 @@
 		      var friendId = $(this).find("td").eq(1).find("a:first").attr("id");
 		      
 		      var htmlText = "Interact with <strong>" + friendName + "</strong>!<br/>";
+<<<<<<< HEAD
 		          htmlText += "<a id='hovercompare' href='#' onclick=\"compareWithFriend('" + friendId + "', '" + friendName + "'); return false;\">Compare</a> | ";
 		          htmlText += "<a id='hoverpost' href='#' onclick=\"postOnFriendWall('" + friendId + "', true); return false;\">Post on Wall</a> | ";
 		          htmlText += "<a id='hoversend' href='#' onclick=\"sendMessageToFriend('" + friendId + "', true); return false;\">Send Message</a>";
+=======
+		          htmlText += "<a id='hovercompare' href='#' onclick=\"compareWithFriend('" + friendId + "'); return false;\">Compare</a> | ";
+		          htmlText += "<a id='hoverpost' href='#' onclick=\"postOnFriendWall('" + friendId + "'); return false;\">Post on Wall</a> | ";
+		          htmlText += "<a id='hoversend' href='#' onclick=\"sendMessageToFriend('" + friendId + "'); return false;\">Send Message</a>";
+>>>>>>> social
 		      $("#contextmenu").find("span").eq(1).html(htmlText);
 		      
 		      var pos = $(this).position();

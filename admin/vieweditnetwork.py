@@ -10,8 +10,10 @@ from obj import obj_network
 from utils import libsna, fbutils, conf, sessionmanager
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 def getNodesEdges(self, uid, session):
     result = fbutils.fql(
@@ -111,11 +113,16 @@ class PostHandler(webapp2.RequestHandler):
                 edges = self.request.get('edges', None)
                 league = self.request.get('league', None)
                 
-                q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
-                network = q.fetch(1)
+                network = cache.get("%s_network" % uid)
+                if network == None:
+                    q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
+                    network = q.fetch(1)
+                    if len(network) == 0: network = None
+                    else:
+                        network = network[0]
+                        cache.add("%s_network" % uid, network, 60*60)
     
-                if len(network) == 0: network = obj_network.Network(uid = uid)
-                else: network = network[0]
+                if not network: network = obj_network.Network(uid = uid)
 
                 network.updated_time = datetime.datetime.now()
                 network.networkhash = networkhash
@@ -123,8 +130,9 @@ class PostHandler(webapp2.RequestHandler):
                 network.setedges(edges)
                 network.setleague(league)
                 network.put()
+                cache.delete("%s_network" % uid)
     
-                logging.info("Updatet network data for user: " + uid)
+                logging.info("Updated network data for user: " + uid)
                 self.redirect('/tech/viewnetwork?uid=' + uid + '&code=' + code)
             else:
                 self.redirect('/tech/viewnetwork?uid=' + uid + '&code=' + code)
@@ -146,11 +154,14 @@ def parsePost(self):
             objreturn = {}
             nodes, edges, networkhash = getNodesEdges(self, uid, session)
             
-            q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
-            network = q.fetch(1)
-
-            if len(network) == 0: network = obj_network.Network(uid = uid)
-            else: network = network[0]
+            network = cache.get("%s_network" % uid)
+            if network == None:
+                q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
+                network = q.fetch(1)
+                if len(network) == 0: network = None
+                else:
+                    network = network[0]
+                    cache.add("%s_network" % uid, network, 60*60)
             
             network.updated_time = datetime.datetime.now()
             network.setnodes(str(nodes))
@@ -173,11 +184,14 @@ def parsePost(self):
 
             table = computeLeague(libSNA, uid, session)
             
-            q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
-            network = q.fetch(1)
-
-            if len(network) == 0: network = obj_network.Network(uid = uid)
-            else: network = network[0]
+            network = cache.get("%s_network" % uid)
+            if network == None:
+                q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
+                network = q.fetch(1)
+                if len(network) == 0: network = None
+                else:
+                    network = network[0]
+                    cache.add("%s_network" % uid, network, 60*60)
             
             network.updated_time = datetime.datetime.now()
             network.setleague(str(table))
@@ -209,9 +223,12 @@ def renderPage(self, mode='admin'):
         
         if uid == None:
             upload_url = '/' + mode + '/viewnetwork?code=' + code
-            users = []
-            q = db.GqlQuery("SELECT * FROM User")
-            for user in q: users.append(user)
+            users = cache.get("users")
+            if users == None:
+                users = []
+                q = db.GqlQuery("SELECT * FROM User")
+                for user in q: users.append(user)
+                cache.add("users", users)
         else:
             if mode == 'tech': upload_url = '/tech/savenetwork?uid=' + uid + '&code=' + code
             else: upload_url = '/admin?code=' + code
@@ -219,12 +236,14 @@ def renderPage(self, mode='admin'):
             if uid == "_new_":
                 network = None
             else:
-                q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
-                network = q.fetch(1)
-    
-                if len(network) == 0: network = None
-                else: network = network[0]
-            
+                network = cache.get("%s_network" % uid)
+                if network == None:
+                    q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
+                    network = q.fetch(1)
+                    if len(network) == 0: network = None
+                    else:
+                        network = network[0]
+                        cache.add("%s_network" % uid, network, 60*60)
         
         template_values = {
             'appId': conf.FBAPI_APP_ID,

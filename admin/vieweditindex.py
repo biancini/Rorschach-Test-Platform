@@ -8,8 +8,10 @@ from obj import obj_index
 from utils import fbutils, conf, sessionmanager, computeprofileindex
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 class PostHandler(webapp2.RequestHandler):    
     def post(self):
@@ -30,8 +32,23 @@ class PostHandler(webapp2.RequestHandler):
                 objreturn = {}
                 objreturn['indexes'] = []
                 
-                q = db.GqlQuery("SELECT * FROM Index WHERE uid = :1", uid)
-                for index in q:
+                indexes = cache.get("%s_indexes" % uid)
+                if indexes == None:
+                    indexes = {}
+                    q = db.GqlQuery("SELECT * FROM Index " +
+                                    "WHERE uid = :1 " +
+                                    "ORDER BY updated_time DESC",
+                                    uid)
+                
+                    for index in q:            
+                        if not index.networkhash == None and \
+                        not index.value == None and \
+                        not index.name in indexes.keys():
+                            indexes[index.name] = index.name
+                            
+                    cache.add("%s_indexes" % uid, indexes, 60*60)
+                
+                for index in indexes.values():
                     if not index.name in objreturn['indexes']: objreturn['indexes'].append(index.name)
                 
                 self.response.out.write(json.dumps(objreturn))
@@ -81,8 +98,23 @@ def parsePost(self):
             objreturn = {}
             objreturn['indexes'] = []
             
-            q = db.GqlQuery("SELECT * FROM Index WHERE uid = :1", uid)
-            for index in q:
+            indexes = cache.get("%s_indexes" % uid)
+            if indexes == None:
+                indexes = {}
+                q = db.GqlQuery("SELECT * FROM Index " +
+                                "WHERE uid = :1 " +
+                                "ORDER BY updated_time DESC",
+                                uid)
+            
+                for index in q:            
+                    if not index.networkhash == None and \
+                    not index.value == None and \
+                    not index.name in indexes.keys():
+                        indexes[index.name] = index
+                        
+                cache.add("%s_indexes" % uid, indexes, 60*60)
+                            
+            for index in indexes.values():
                 if not index.name in objreturn['indexes']: objreturn['indexes'].append(index.name)
             
             self.response.out.write(json.dumps(objreturn))
@@ -117,9 +149,12 @@ def renderPage(self, mode='admin'):
         
         if uid == None:
             upload_url = '/' + mode + '/viewindex?code=' + code
-            users = []
-            q = db.GqlQuery("SELECT * FROM User")
-            for user in q: users.append(user)
+            users = cache.get("users")
+            if users == None:
+                users = []
+                q = db.GqlQuery("SELECT * FROM User")
+                for user in q: users.append(user)
+                cache.add("users", users)
         else:
             if mode == 'tech': upload_url = '/tech/saveindex?uid=' + uid + '&code=' + code
             else: upload_url = '/admin?code=' + code
@@ -127,12 +162,26 @@ def renderPage(self, mode='admin'):
             indexname = self.request.get('indexname', None)
             
             if indexname != "_new_":
-                q = db.GqlQuery("SELECT * FROM Index WHERE uid = :1 AND name = :2 ORDER BY updated_time DESC",
-                                uid, indexname)
-                index = q.fetch(1)
-
-                if len(index) == 0: index = None
-                else: index = index[0]
+                indexes = cache.get("%s_indexes" % uid)
+                if indexes == None:
+                    indexes = {}
+                    q = db.GqlQuery("SELECT * FROM Index " +
+                                    "WHERE uid = :1 " +
+                                    "ORDER BY updated_time DESC",
+                                    uid)
+                
+                    for index in q:            
+                        if not index.networkhash == None and \
+                        not index.value == None and \
+                        not index.name in indexes.keys():
+                            indexes[index.name] = index
+                            
+                    cache.add("%s_indexes" % uid, indexes, 60*60)
+                
+                index = None
+                for curindex in indexes.values():
+                    if curindex.name == indexname:
+                        index = curindex
             else:
                 index = None
             

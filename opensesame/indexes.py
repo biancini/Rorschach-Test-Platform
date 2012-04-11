@@ -4,8 +4,10 @@ import webapp2
 from google.appengine.ext import db
 from utils import fbutils, conf, sessionmanager
 from google.appengine.ext.webapp import template
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 class MainPage(webapp2.RequestHandler):
     def renderPage(self):
@@ -20,11 +22,23 @@ class MainPage(webapp2.RequestHandler):
             indexes = {}
             for index in conf.INDEXES.keys(): indexes[index] = "<null>"
             
-            q = db.GqlQuery("SELECT * FROM Index " +
-                            "WHERE uid = :1 " +
-                            "ORDER BY updated_time DESC",
-                            session['me']['id'])
-            for index in q:
+            indexes = cache.get("%s_indexes" % session['me']['id'])
+            if indexes == None:
+                indexes = {}
+                q = db.GqlQuery("SELECT * FROM Index " +
+                                "WHERE uid = :1 " +
+                                "ORDER BY updated_time DESC",
+                                session['me']['id'])
+            
+                for index in q:            
+                    if not index.networkhash == None and \
+                    not index.value == None and \
+                    not index.name in indexes.keys():
+                        indexes[index.name] = index
+                        
+                cache.add("%s_indexes" % session['me']['id'], indexes, 60*60)
+            
+            for index in indexes.values():
                 if not index.networkhash == None and not index.value == None:
                     indexes[index.name] = (conf.INDEX_TYPES[index.name]) % index.value
             

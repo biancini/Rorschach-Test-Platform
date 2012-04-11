@@ -5,8 +5,10 @@ from datetime import date
 from utils import fbutils, conf, sessionmanager
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 class MainPage(webapp2.RequestHandler):
     def renderPage(self):
@@ -19,14 +21,20 @@ class MainPage(webapp2.RequestHandler):
                 return
         
             withindates = {}
-            tests = []
-            q = db.GqlQuery("SELECT * FROM Test")
-            for test in q:
+            tests = cache.get("tests")
+            if tests == None:
+                tests = []
+                q = db.GqlQuery("SELECT * FROM Test")
+                for test in q: tests.append(test)
+                cache.add("tests", tests)
+            
+            testsactive = []
+            for test in tests:
                 if test != None and test.startdate != None and test.enddate != None:
                     if test.startdate <= date.today() and test.enddate >= date.today():
                         withindates[test.name] = True
 
-                tests.append(test)
+                testsactive.append(test)
             
             template_values = {
                 'appId': conf.FBAPI_APP_ID,
@@ -35,7 +43,7 @@ class MainPage(webapp2.RequestHandler):
                 'conf': conf,
                 'me': session['me'],
                 'roles': roles,
-                'tests': tests,
+                'tests': testsactive,
                 'withindates': withindates,
                 'isdesktop': session['isdesktop'],
                 'header': '',

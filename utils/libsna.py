@@ -9,21 +9,26 @@ import numpy as np
 import networkx as nx
 from myexceptions import network_big
 from google.appengine.ext import db
-
+from google.appengine.api import memcache
 from obj import obj_network
 
 conf = conf.Config()
+cache = memcache.Client()
 
 def getusernetwork(uidin):
-    q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uidin)
-    network = q.fetch(1)
+    network = cache.get("%s_network" % uidin)
+    if network == None:
+        q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uidin)
+        network = q.fetch(1)
+        if len(network) == 0: network = None
+        else:
+            network = network[0]
+            cache.add("%s_network" % uidin, network, 60*60)
     
-    if len(network) == 0:
+    if not network:
         network = obj_network.Network(uid = uidin)
         network.updated_time = datetime.datetime.now()
         network.put()
-    else:
-        network = network[0]
         
     return network
 

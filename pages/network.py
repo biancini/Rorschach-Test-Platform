@@ -5,9 +5,11 @@ import os.path
 
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from google.appengine.api import memcache
 from utils import conf, sessionmanager, fbutils
 
 conf = conf.Config()
+cache = memcache.Client()
 
 class MainPage(webapp2.RequestHandler):
     def postPage(self, uid):
@@ -22,12 +24,22 @@ class MainPage(webapp2.RequestHandler):
         action = self.request.get('action', None)
         if code != None and action == 'getFriendValues':
             objreturn = {}
-            q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", frienduid)
-            #q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
-            networks  = q.fetch(1)
+            
+            network = cache.get("%s_network" % frienduid)
+            if network == None:
+                q = db.GqlQuery("SELECT * FROM Index " +
+                                "WHERE uid = :1 " +
+                                "ORDER BY updated_time DESC",
+                                session['me']['id'])
+                
+                q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", frienduid)
+                network = q.fetch(1)
+                if len(network) == 0: network = None
+                else:
+                    network = network[0]
+                    cache.add("%s_network" % frienduid, network, 60*60)
 
-            if not len(networks) == 0:
-                network = networks[0]
+            if network:
                 league = network.getleague()
                 
                 objreturn['nodes'] = len(network.getnodes())
@@ -55,12 +67,21 @@ class MainPage(webapp2.RequestHandler):
         league = None
         hiddenleague = False
         
-        q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
-        networks = q.fetch(1)
-
-        if not len(networks) == 0:
-            network = networks[0]
+        network = cache.get("%s_network" % uid)
+        if network == None:
+            q = db.GqlQuery("SELECT * FROM Index " +
+                            "WHERE uid = :1 " +
+                            "ORDER BY updated_time DESC",
+                            session['me']['id'])
             
+            q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
+            network = q.fetch(1)
+            if len(network) == 0: network = None
+            else:
+                network = network[0]
+                cache.add("%s_network" % uid, network, 60*60)
+
+        if network:
             nodes = network.getnodes()
             edges = network.getedges()
             league = network.getleague()

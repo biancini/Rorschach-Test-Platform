@@ -3,8 +3,10 @@ import libsna, conf, fbutils, sessionmanager
 
 from google.appengine.ext import db
 import networkx as nx
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 def sorted_map(inmap):
         return sorted(inmap.iteritems(), key=lambda (k,v): (-v,k))
@@ -67,13 +69,19 @@ class MainPage(webapp2.RequestHandler):
         
         table = computeLeague(libSNA, session)
         
-        q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
-        network = q.fetch(1)
-    
-        if len(network) > 0:
+        network = cache.get("%s_network" % uid)
+        if network == None:
+            q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
+            network = q.fetch(1)
+            if len(network) == 0: network = None
+            else:
+                network = network[0]
+                cache.add("%s_network" % uid, network, 60*60)
+        if network > 0:
             network = network[0]
             network.setleague(str(table))
             network.put()
+            cache.delete("%s_network" % uid)
                 
         self.response.out.write(str(table))
 

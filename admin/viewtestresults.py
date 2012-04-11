@@ -5,8 +5,10 @@ from obj import obj_testresults
 from utils import fbutils, conf, sessionmanager
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 def renderPage(self):
     session = sessionmanager.getsession(self)
@@ -22,9 +24,18 @@ def renderPage(self):
         upload_url = '/admin/savetest?code=' + code
         
         testid = self.request.get('testid', None)
-        q = db.GqlQuery("SELECT * FROM Test WHERE testid = :1", testid)
-        tests = q.fetch(1)
-        test = (len(tests) > 0) and tests[0] or None
+        tests = cache.get("tests")
+        if tests:
+            test = None
+            for curtest in tests:
+                if curtest.testid == testid: test = curtest
+            
+        else:
+            q = db.GqlQuery("SELECT * FROM Test WHERE testid = :1", testid)
+            test = q.fetch(1)
+
+            if len(test) > 0: test = test[0]
+            else: test = None
         
         testresults = []
         q = db.GqlQuery("SELECT * FROM TestResults WHERE testid = :1", testid)

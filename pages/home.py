@@ -10,6 +10,7 @@ from google.appengine.ext import db
 from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 class MainPage(webapp2.RequestHandler):
     def renderPage(self):
@@ -22,15 +23,22 @@ class MainPage(webapp2.RequestHandler):
                 "WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND "
                 "  is_app_user = 1", session['access_token'])
             
-            q = db.GqlQuery("SELECT * FROM User WHERE uid = :1", session['me']['id'])
-            users = q.fetch(1)
+            users = cache.get("users")
+            if users == None:
+                users = []
+                q = db.GqlQuery("SELECT * FROM User")
+                for user in q: users.append(user)
+                cache.add("users", users)
+            
+            curuser = None
+            for user in users:
+                if user.uid == session['me']['id']: curuser = user
 
             datefb = session['me']['updated_time'].replace("+0000", "").replace("T", " ")
             datefb = datetime.datetime.fromtimestamp(
                    time.mktime(time.strptime(datefb, "%Y-%m-%d %H:%M:%S")))
             
-            if len(users) > 0:
-                curuser = users[0]
+            if curuser:
                 datedb = curuser.updated_time
 
                 if datefb > datedb:
@@ -41,6 +49,7 @@ class MainPage(webapp2.RequestHandler):
                         curuser.username = session['me']['username']
                     curuser.updated_time = datefb
                     curuser.put()
+                    users = cache.delete("users")
                   
                     logging.info('User updated: ' + session['me']['id'])
             else:
@@ -52,27 +61,38 @@ class MainPage(webapp2.RequestHandler):
                     curuser.username = session['me']['username']
                 curuser.updated_time = datefb
                 curuser.put()
+                session['me']['first_name']
               
                 logging.info('User added: ' + session['me']['id'])
 
-            indexes = []
-            q = db.GqlQuery("SELECT * FROM Index " +
-                        "WHERE uid = :1 " +
-                        "ORDER BY updated_time DESC",
-                        session['me']['id'])
+            indexes = cache.get("%s_indexes" % session['me']['id'])
+            if indexes == None:
+                indexes = {}
+                q = db.GqlQuery("SELECT * FROM Index " +
+                                "WHERE uid = :1 " +
+                                "ORDER BY updated_time DESC",
+                                session['me']['id'])
             
-            for index in q:            
-                if not index.networkhash == None and \
-                   not index.value == None and \
-                   not index.name in indexes:
-                    indexes.append(index.name)
+                for index in q:            
+                    if not index.networkhash == None and \
+                    not index.value == None and \
+                    not index.name in indexes.keys():
+                        indexes[index.name] = index
+                        
+                cache.add("%s_indexes" % session['me']['id'], indexes, 60*60)
             
-            tests = []
-            q = db.GqlQuery("SELECT * FROM Test")
-        
-            for test in q:
-                if test.active and datetime.date.today() >= test.startdate and datetime.date.today() <= test.enddate:
-                    tests.append(test)
+            tests = cache.get("tests")
+            if tests == None:
+                tests = []
+                q = db.GqlQuery("SELECT * FROM Test")
+                for test in q: tests.append(test)
+                cache.add("tests", tests)
+                
+            testsactive = []
+            for test in tests:
+                    if test.active and datetime.date.today() >= test.startdate and datetime.date.today() <= test.enddate:
+                        testsactive.append(test)
+
 
             template_values = {
                 'appId': conf.FBAPI_APP_ID,
@@ -82,9 +102,9 @@ class MainPage(webapp2.RequestHandler):
                 'conf': conf,
                 'me': session['me'],
                 'roles': session['roles'],
-                'computedindexes': indexes,
+                'computedindexes': indexes.keys(),
                 'numindexes': len(conf.INDEXES),
-                'tests': tests,
+                'tests': testsactive,
                 'isdesktop': session['isdesktop'],
                 'header': '',
                 'code': self.request.get('code') }

@@ -6,8 +6,10 @@ import numpy as np
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from utils import fbutils, conf, sessionmanager
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 class MainPage(webapp2.RequestHandler):
     def setcentiles(self, values):
@@ -83,16 +85,27 @@ class MainPage(webapp2.RequestHandler):
         action = self.request.get('action', None)
         if session and action == 'getFriendValues':
             objreturn = {}
-            q = db.GqlQuery("SELECT * FROM Index " +
-                        "WHERE uid = :1 AND name = :2 " +
-                        "ORDER BY updated_time DESC",
-                        frienduid,
-                        indexname)
-            indexes = q.fetch(1)
-
-            if not len(indexes) == 0:
-                index = indexes[0]
+            indexes = cache.get("%s_indexes" % uid)
+            if indexes == None:
+                indexes = {}
+                q = db.GqlQuery("SELECT * FROM Index " +
+                                "WHERE uid = :1 " +
+                                "ORDER BY updated_time DESC",
+                                uid)
             
+                for index in q:            
+                    if not index.networkhash == None and \
+                    not index.value == None and \
+                    not index.name in indexes.keys():
+                        indexes[index.name] = index
+                        
+                cache.add("%s_indexes" % uid, indexes, 60*60)
+                
+            index = None
+            for curindex in indexes.values():
+                if curindex.name == indexname: index = curindex
+            
+            if index:
                 objreturn['value'] = index.value
                 newvalues = self.setcentiles(index.get_nodevalues())
                 if newvalues != None: objreturn['nodevalues'] = str(self.mergevalues(myvalues, newvalues))
@@ -130,16 +143,27 @@ class MainPage(webapp2.RequestHandler):
             if session['me']['id'] != uid: code = None
         except: code = None
                         
-        q = db.GqlQuery("SELECT * FROM Index " +
-                        "WHERE uid = :1 AND name = :2 " +
-                        "ORDER BY updated_time DESC",
-                        uid,
-                        indexname)
-        indexes = q.fetch(1)
-
-        if not len(indexes) == 0:
-            index = indexes[0]
+        indexes = cache.get("%s_indexes" % uid)
+        if indexes == None:
+            indexes = {}
+            q = db.GqlQuery("SELECT * FROM Index " +
+                            "WHERE uid = :1 " +
+                            "ORDER BY updated_time DESC",
+                            uid)
+        
+            for index in q:            
+                if not index.networkhash == None and \
+                not index.value == None and \
+                not index in indexes.keys():
+                    indexes[index.name] = index
+                    
+            cache.add("%s_indexes" % uid, indexes, 60*60)
             
+        index = None
+        for curindex in indexes.values():
+            if curindex.name == indexname: index = curindex
+
+        if index:
             value = index.value
             nodevalues = self.setcentiles(index.get_nodevalues())
             edgevalues = self.setcentiles(index.get_edgevalues())

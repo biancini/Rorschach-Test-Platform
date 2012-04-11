@@ -4,8 +4,10 @@ import os.path, re
 from utils import fbutils, conf, sessionmanager
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from google.appengine.api import memcache
 
 conf = conf.Config()
+cache = memcache.Client()
 
 numeric_test = re.compile("^\d+$")
 def getattribute(value, arg):
@@ -28,12 +30,24 @@ class MainPage(webapp2.RequestHandler):
         session = sessionmanager.getsession(self)
         
         if session:
+            indexesList = cache.get("%s_indexes" % session['me']['id'])
+            if indexesList == None:
+                indexesList = {}
+                q = db.GqlQuery("SELECT * FROM Index " +
+                                "WHERE uid = :1 " +
+                                "ORDER BY updated_time DESC",
+                                session['me']['id'])
+            
+                for index in q:            
+                    if not index.networkhash == None and \
+                    not index.value == None and \
+                    not index.name in indexesList:
+                        indexesList[index.name] = index
+                        
+                cache.add("%s_indexes" % session['me']['id'], indexesList, 60*60)
+                
             indexes = {}
-            q = db.GqlQuery("SELECT * FROM Index " +
-                        "WHERE uid = :1 " +
-                        "ORDER BY updated_time DESC",
-                        session['me']['id'])
-            for index in q:            
+            for index in indexesList.values():
                 if not index.networkhash == None and \
                    not index.value == None:
                     indexes[index.name] = (conf.INDEX_TYPES[index.name]) % index.value

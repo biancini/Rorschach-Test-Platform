@@ -1,4 +1,5 @@
 from google.appengine.ext.webapp import template
+from utils import conf
 
 register = template.create_template_register()
 
@@ -11,5 +12,12 @@ def fstrreplace(v, p):
     f, r = p.split('|')
     return str(v).replace(f, r)
 
+def fortmatindex(v, name):
+    if name in conf.Config().INDEX_TYPES: formatted = conf.Config().INDEX_TYPES[name] % v
+    else: formatted = floatf(v, 2)
+    
+    return formatted
+
 register.filter('formatstrreplace', fstrreplace)
 register.filter('formatfloat', floatf)
+register.filter('fortmatindex', fortmatindex)

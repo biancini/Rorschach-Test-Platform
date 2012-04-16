@@ -62,7 +62,7 @@
         });
       // -->
       </script>
-      <p id="picture" style="background-image: url(https://graph.facebook.com/me/picture?type=square&access_token={{token}})"></p>
+      <p id="picture" style="background-image: url(/static/images/profile.png)"></p>
 	  <p><strong>{{me.first_name}}</strong>, it is strongly suggested you check your profile and verify it has been completely computed and it is up to date.</p>            
       <p>The profile is really important for the evaluating testing results and must kept up to date.</p>
       If you think something relevant changed in your FB network, recompute your profile!</p>
@@ -72,6 +72,8 @@
         <a href="network/{{me.id}}?code={{code}}" id="{{indexname}}_compute" class="facebook-button">
         <span class="plus" id="{{indexname}}_text">View network data</span></a>
       </p>
+      
+      <p><div class="fb-comments" data-href="{{conf.BASE_URL}}profile" data-num-posts="2" data-width="740"></div></p>
     </section>
  
     {% for group in index_groups|dictsort:"order" %}

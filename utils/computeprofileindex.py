@@ -62,21 +62,21 @@ def computeIndex(self, libSNA, indexname, backend, session, saveInDatastore=True
     uid = self.request.get('id', None)
     if uid == None: uid = self.request.get('uid', None)
     
-    indexes = cache.get("%s_indexes" % session['me']['id'])
+    indexes = cache.get("%s_indexes" % uid)
     if indexes == None:
         indexes = {}
         q = db.GqlQuery("SELECT * FROM Index " +
                         "WHERE uid = :1 " +
                         "ORDER BY updated_time DESC",
-                        session['me']['id'])
+                        uid)
     
         for index in q:            
             if not index.networkhash == None and \
             not index.value == None and \
             not index.name in indexes.keys():
-                indexes[index.name] = index.name
+                indexes[index.name] = index
                 
-        cache.add("%s_indexes" % session['me']['id'], indexes, 60*60)
+        cache.add("%s_indexes" % uid, indexes, 60*60)
     
     index = None
     for curindex in indexes.values():
@@ -132,7 +132,7 @@ def computeIndex(self, libSNA, indexname, backend, session, saveInDatastore=True
                 if not edges == None: index.set_edgevalues(edges)
                 if not nodes == None: index.set_nodevalues(nodes)
                 index.put()
-                cache.delete("%s_indexes" % session['me']['id'])
+                cache.delete("%s_indexes" % uid)
 
     except network_big.NetworkTooBigException as ex:
         logging.info('Computation of ' + indexname + ' sent to backend backend-indexes.')

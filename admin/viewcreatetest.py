@@ -141,7 +141,6 @@ class PostHandler(webapp2.RequestHandler):
                     testid = str(datetime.datetime.now()) + " " + session['me']['id']
                     test = obj_test.Test(testid=testid, name=testname)
                 else:
-                    test = test[0]
                     if test.owner != session['me']['id']:
                         self.response.out.write("You are not the test owner of this test. Access denied.")
                         return

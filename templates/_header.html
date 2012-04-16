@@ -11,6 +11,7 @@
 	<meta property="og:description" content="{{description}}" />
 	<meta property="og:index_name"  content="{{indexname}}" />
 	<meta property="og:index_value" content="{{value}}" />
+	<meta property="fb:admins"      content="500674896"/>
   {% else %}
   {% if header == "network" %}
   <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# {{conf.APP_NAMESPACE}}: http://ogp.me/ns/fb/{{conf.APP_NAMESPACE}}#">
@@ -23,6 +24,7 @@
 	<meta property="og:nodes"       content="{{nodes|length}}" />
 	<meta property="og:edges"       content="{{edges|length}}" />
 	<meta property="og:description" content="Network object" />
+	<meta property="fb:admins"      content="500674896"/>
   {% else %}
   <head>
     <meta charset="utf-8" />

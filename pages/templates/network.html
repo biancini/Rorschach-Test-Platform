@@ -17,23 +17,78 @@
     
     <section id="normalsection" class="clearfix">
       {% if not code == None %}
-        <h2>Network for user: {{uid}}<br/>
-        (generate network file: <a href="/network.gdf?uid={{uid}}&code={{ code }}">GDF</a> or <a href="/network.graphml?uid={{uid}}&code={{ code }}">graphml</a>)<br/>
-        <a href="#" onclick="post_wall()" class="facebook-button">
+        <h2>Network for user: {{uid}} (generate network file: <a href="/network.gdf?uid={{uid}}&code={{ code }}">GDF</a> or <a href="/network.graphml?uid={{uid}}&code={{ code }}">graphml</a>)
+        <a href="#" onclick="post_wall()" class="facebook-button" style="float: right">
           <span class="plus">Post your network data on your profile</span>
         </a></h2>
       {% else %}
         <h2>Network for user: {{uid}}</h2>
       {% endif %}
     </section>
-   
+    
     <section id="normalsection" class="clearfix">
-      <p class="title">The network has the following characteristics:</p>
+      <p class="title">Graphical representation of the Facebook network:</p>
+
       {% if not nodes == None and not edges == None %}
-      <table style="width: 500px; border: 0px; margin: 0px; padding; 0px">
-      <tr><td>Network nodes number: {{nodes|length}}</td><td align="right"><span id="friendnodes"></span></td>
-      <tr><td>Network edges number: {{edges|length}}</td><td align="right"><span id="friendedges"></span></td>
-      </table>
+      <table id="table_nodes"><tr>
+      <td><div id="network_div"></div></td>
+      <td>
+        <h3>Your Facebook network nodes (and edges) count:</h3><br/>&nbsp;
+        <span id="indexvalue">{{nodes|length}} <small>({{edges|length}})</small></span>
+        <p>&nbsp;</p>
+        <table><tr>
+        <td><a name="fb_share" type="button" share_url="{{conf.BASE_URL}}network/{{uid}}">Share</a>&nbsp;
+        <script src="https://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script></td>
+        <td><a href="https://twitter.com/share" class="twitter-share-button" data-url="{{conf.BASE_URL}}network/{{uid}}" data-text="According to Rorschach Test Platform my Facebook network has {{nodes|length}} nodes and {{edges|length}} edges!" data-count="none" data-hashtags="RorschachTestPlatf">Tweet</a>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></td>
+	    </tr></table>
+		<h3 id="comparisonvalue"></h3><br/>&nbsp;
+        <span id="friendvalue"></span>
+      </td>
+      </tr></table>
+        
+      <script type="text/javascript">
+      <!--
+        google.load("visualization", "1", {packages:["corechart"]});
+        google.setOnLoadCallback(drawChartAlone);
+        
+        function drawChartAlone() {
+          drawChart(null, null);
+        }
+          
+        function drawChart(friendNodes, friendEdges) {
+          var data;
+          
+          if (friendNodes != null && friendEdges != null) {
+            data = google.visualization.arrayToDataTable([
+                   ['Dimension', 'Your Percent', 'Friend\'s Percent'],
+                   ['# nodes',  {{nodes|length}}/2500, friendNodes/2500],
+                   ['# edges',  {{edges|length}}/({{nodes|length}}*{{nodes|length}}), friendEdges/(friendNodes*friendNodes)],
+            ]);
+          }
+          else {
+            data = google.visualization.arrayToDataTable([
+                   ['Dimension', 'Percent'],
+                   ['# nodes',  {{nodes|length}}/2500],
+                   ['# edges',  {{edges|length}}/({{nodes|length}}*{{nodes|length}})],
+            ]);
+          }
+
+          new google.visualization.BarChart(document.getElementById('network_div')).draw(
+               data,
+               {title:"Facebook Network Representation",
+                width: 500, height: 400,
+                vAxis: {title: "Dimension"},
+                hAxis: {title: "Percent", minValue: 0},
+                legend: {position: "none"}}
+          );
+        }
+      // -->
+      </script>
+      {% else %}
+      <p>At least one index value must be calculated in order to have the network computed and visible here.</p>
+      {% endif %}
+    
       {% if not code == None and friends != None and friends|length > 0  %}
       <p>&nbsp;</p>
       
@@ -82,8 +137,8 @@
           else { $("#friend option[value='" + friendId + "']").attr('selected','selected');  }
           
       	  $('#comparemessage').text('Retrieving ' + friendName + '\'s network...');
-          $('#friendnodes').text('');
-          $('#friendedges').text('');
+          $('#comparisonvalue').text('');
+          $('#friendvalue').html('');
           if (!$('#comparisonchart').is(':hidden')) $('#comparisonchart').hide();
           if (!$('#comparisonresult').is(':hidden')) $('#comparisonresult').hide();
           
@@ -100,10 +155,12 @@
 	          $('#comparemessage').text('');
 	          if (data.nodes == null || data.edges == null) {
 	            $('#comparemessage').html(friendName + " has not computed network information. <a href=\"#\" onclick=\"sendMessageToFriend('" + friendId + "', false); return false;\">Tell him/her to do it immediately</a>!");
+	            drawChartAlone();
 	          }
 	          else {
-  	            $('#friendnodes').text(friendName + '\'s nodes: ' + data.nodes);
-	            $('#friendedges').text(friendName + '\'s edges: ' + data.edges);
+  	            $('#comparisonvalue').text(friendName + '\'s Facebook network nodes (and edges) count:');
+	            $('#friendvalue').html(data.nodes + ' <small>(' + data.edges + ')</small>');
+	            drawChart(data.nodes, data.edges);
 	            
 	            {% if not hiddenleague %}
 	            if ($('#comparisonchart').is(':hidden')) $('#comparisonchart').show();
@@ -154,6 +211,7 @@
 	        },
 	        error : function(XMLHttpRequest, textStatus, errorThrown) {
 	          $('#comparemessage').text("Error while retrieving friends index value.");
+	          drawChartAlone();
 	        }
 	      });
 	    }
@@ -200,10 +258,11 @@
         $('#friend').change(function() {
           if ($('#friend option:selected').val() == "") {
             $('#comparemessage').text('');
-            $('#friendnodes').text('');
-            $('#friendedges').text('');
+            $('#comparisonvalue').text('');
+            $('#friendvalue').html('');
             if (!$('#comparisonchart').is(':hidden')) $('#comparisonchart').hide();
 	        if (!$('#comparisonresult').is(':hidden')) $('#comparisonresult').hide();
+	        drawChartAlone();
           }
           else {
             compareWithFriend($('#friend option:selected').val(), null);
@@ -221,33 +280,36 @@
       // -->    	
       </script>
       {% endif %}
+      </section>
+      
+      <section id="normalsection" class="clearfix">
+        <p class="title">Elite group of the network:</p>
         {% if not league == None %}
         <p>&nbsp;</p>
-        <p class="title">Elite group of the network:
-          {% if not hiddenleague %}
-          <table id="podium">
-            <tr class="podiumimgrow">
-              <td rowspan="2" class="picture"><div class="podiumpicdiv1"><div class="podiumpicdiv2"><a href="http://www.facebook.com/profile.php?id={{league.1.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.1.0}}/picture?type=normal" alt="{{league.1.1}}" border="0" /></a></div></div></td>
-              <td class="picture"><div class="podiumpicdiv1"><div class="podiumpicdiv2"><a href="http://www.facebook.com/profile.php?id={{league.0.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.0.0}}/picture?type=normal" alt="{{league.0.1}}" border="0" /></a></div><div class="badge1st"><img src="/static/images/ribbon_1st.png" /></div></div></td>
-              <td rowspan="3" class="picture"><div class="podiumpicdiv1"><div class="podiumpicdiv2"><a href="http://www.facebook.com/profile.php?id={{league.2.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.2.0}}/picture?type=normal" alt="{{league.2.1}}" border="0" /></a></div></div></td>
-            </tr>
-            <tr class="podiumrow"><td rowspan="3" class="pavement"><strong>1</strong></td></tr>
-            <tr class="podiumrow"><td rowspan="2" class="pavement">2</td></tr>
-            <tr class="podiumrow"><td class="pavement">3</td></tr>
-          </table>
-          {% endif %}
+        {% if not hiddenleague %}
+        <table id="podium">
+          <tr class="podiumimgrow">
+            <td rowspan="2" class="picture"><div class="podiumpicdiv1"><div class="podiumpicdiv2"><a href="http://www.facebook.com/profile.php?id={{league.1.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.1.0}}/picture?type=normal" alt="{{league.1.1}}" border="0" /></a></div></div></td>
+            <td class="picture"><div class="podiumpicdiv1"><div class="podiumpicdiv2"><a href="http://www.facebook.com/profile.php?id={{league.0.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.0.0}}/picture?type=normal" alt="{{league.0.1}}" border="0" /></a></div><div class="badge1st"><img src="/static/images/ribbon_1st.png" /></div></div></td>
+            <td rowspan="3" class="picture"><div class="podiumpicdiv1"><div class="podiumpicdiv2"><a href="http://www.facebook.com/profile.php?id={{league.2.0}}" target="_blank"><img src="https://graph.facebook.com/{{league.2.0}}/picture?type=normal" alt="{{league.2.1}}" border="0" /></a></div></div></td>
+          </tr>
+          <tr class="podiumrow"><td rowspan="3" class="pavement"><strong>1</strong></td></tr>
+          <tr class="podiumrow"><td rowspan="2" class="pavement">2</td></tr>
+          <tr class="podiumrow"><td class="pavement">3</td></tr>
+        </table>
+        {% endif %}
         
-          <table id="values" class="longvalues">
-            <thead class="valueshead"><td>Ranking:</td><td>Name:</td><td>Degree:</td><td>Closeness:</td><td>Betweenness:</td></thead>
-            {% for row in league %}
-            <tr><td>{{forloop.counter}}</td><td id="text">{% if not hiddenleague %}<a id="{{row.0}}" href="http://www.facebook.com/profile.php?id={{row.0}}" target="_blank">{% endif %}{{row.1}}{% if not hiddenleague %}</a>{% endif %}</td><td id="value">{{row.2}}</td><td id="value">{{row.3|formatfloat:'6'}}</td><td id="value">{{row.4|formatfloat:'6'}}</td></tr>
-            {% endfor %}
-          </table>
+        <table id="values" class="longvalues">
+          <thead class="valueshead"><td>Ranking:</td><td>Name:</td><td>Degree:</td><td>Closeness:</td><td>Betweenness:</td></thead>
+          {% for row in league %}
+          <tr><td>{{forloop.counter}}</td><td id="text">{% if not hiddenleague %}<a id="{{row.0}}" href="http://www.facebook.com/profile.php?id={{row.0}}" target="_blank">{% endif %}{{row.1}}{% if not hiddenleague %}</a>{% endif %}</td><td id="value">{{row.2}}</td><td id="value">{{row.3|formatfloat:'6'}}</td><td id="value">{{row.4|formatfloat:'6'}}</td></tr>
+          {% endfor %}
+        </table>
           
-          <div id="contextmenu"><span class="bracket">&#123;</span><span class="textmenu"></span></div>
+        <div id="contextmenu"><span class="bracket">&#123;</span><span class="textmenu"></span></div>
           
-          {% if not hiddenleague %}
-          <script type="text/javascript">
+        {% if not hiddenleague %}
+        <script type="text/javascript">
 		  <!--
 		  $(function() {
 		    $("#values tr").hover(
@@ -260,15 +322,9 @@
 		      var friendId = $(this).find("td").eq(1).find("a:first").attr("id");
 		      
 		      var htmlText = "Interact with <strong>" + friendName + "</strong>!<br/>";
-<<<<<<< HEAD
-		          htmlText += "<a id='hovercompare' href='#' onclick=\"compareWithFriend('" + friendId + "', '" + friendName + "'); return false;\">Compare</a> | ";
-		          htmlText += "<a id='hoverpost' href='#' onclick=\"postOnFriendWall('" + friendId + "', true); return false;\">Post on Wall</a> | ";
-		          htmlText += "<a id='hoversend' href='#' onclick=\"sendMessageToFriend('" + friendId + "', true); return false;\">Send Message</a>";
-=======
-		          htmlText += "<a id='hovercompare' href='#' onclick=\"compareWithFriend('" + friendId + "'); return false;\">Compare</a> | ";
-		          htmlText += "<a id='hoverpost' href='#' onclick=\"postOnFriendWall('" + friendId + "'); return false;\">Post on Wall</a> | ";
-		          htmlText += "<a id='hoversend' href='#' onclick=\"sendMessageToFriend('" + friendId + "'); return false;\">Send Message</a>";
->>>>>>> social
+		      htmlText += "<a id='hovercompare' href='#' onclick=\"compareWithFriend('" + friendId + "', '" + friendName + "'); return false;\">Compare</a> | ";
+		      htmlText += "<a id='hoverpost' href='#' onclick=\"postOnFriendWall('" + friendId + "', true); return false;\">Post on Wall</a> | ";
+		      htmlText += "<a id='hoversend' href='#' onclick=\"sendMessageToFriend('" + friendId + "', true); return false;\">Send Message</a>";
 		      $("#contextmenu").find("span").eq(1).html(htmlText);
 		      
 		      var pos = $(this).position();
@@ -293,10 +349,25 @@
 		  </script>
           {% endif %}
 	    </p>
+	    {% else %}
+        <p>At least one index value must be calculated in order to have the network computed and visible here.</p>
 	    {% endif %}
-	  {% else %}
-	  <p>At least one index value must be calculated in order to have the network computed and visible here.</p>
-      {% endif %}
+    </section>
+    
+    <section id="normalsection" class="clearfix">
+      <p><div class="fb-comments" data-href="{{conf.BASE_URL}}network/{{uid}}" data-num-posts="2" data-width="672"></div></p>
+      <script type="text/javascript">
+      <!--
+      var head = $("head").get(0);  // using jquery
+	  var script2 = document.createElement("script");
+	  if (!$.browser.msie ) {
+	    script2.innerHTML = "window.FB = null;FB=null;";
+	  }else{
+	    script2.text = "window.FB = null;FB=null;";
+	  }
+	  head.appendChild(script2);
+      // -->
+      </script>
     </section>
     
     <script type="text/javascript">

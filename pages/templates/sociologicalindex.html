@@ -17,9 +17,9 @@
   
     <section id="normalsection" class="clearfix">
       {% if not code == None %}
-        <h2>Index computed for user: {{uid}}<br/>
-        <a href="#" onclick="post_wall('{{indexname}}', '{{value}}')" class="facebook-button">
-          <span class="plus">Post this index value on your profile</span>
+        <h2>Index computed for user: {{uid}}
+        <a href="#" onclick="post_wall('{{indexname}}', '{{value}}')" class="facebook-button" style="float: right">
+        <span class="plus">Post this index value on your profile</span>
         </a></h2>
       {% else %}
         <h2>Index computed for user: {{uid}}</h2>
@@ -40,154 +40,30 @@
       {% else %}
       <p>&nbsp;</p>
       {% endif %}
-      <p>Computed value: {{value}} <span id="friendvalue"></span></p>
-      
-      {% if not code == None and friends != None and friends|length > 0  %}
-      <p>&nbsp;</p>
-      <p><a id="comparelink" href="#">Compare your index value with one of your friends</a></p>
-      
-      <div id ="comparediv">
-        <p>Select the friend from the dropdown list:
-        <select id="friend" name="friend">
-          <option value=""></option>
-          {% for friend in friends %}
-          <option value="{{friend.uid}}">{{friend.name}}</option>
-          {% endfor %}
-        </select> <span id="comparemessage"/></p>
-      </div>
+    </section>
     
-      <script language="javascript">
-      <!--
-        $('#friend').change(function() {
-          if ($('#friend option:selected').val() == "") {
-            $('#comparemessage').text('');
-            $('#friendvalue').text('');
-            if (chartType == 'scatter') drawChart(rowCurUser, 1);
-	        else drawChart(rowCurUserG, 1);
-          }
-          else {
-            $('#comparemessage').text('Retrieving ' + $('#friend option:selected').text() + '\'s index...');
-            $('#friendvalue').text('');
-            
-            $.ajax({
-	          type : 'POST',
-	          url : '/index/{{uid}}/{{indexname}}',
-	          dataType : 'json',
-	          data: {
-	             code : '{{code}}',
-	             frienduid: $('#friend option:selected').val(),
-	             {% if not nodevalues == None %}
-	             myvalues: "{% autoescape off %}{{nodevalues}}{% endautoescape %}",
-	             myvaluesG: "{% autoescape off %}{{nodegaussian}}{% endautoescape %}",
-	             {% endif %}
-	             {% if not edgevalues == None %}
-	             myvalues: "{% autoescape off %}{{edgevalues}}{% endautoescape %}",
-	             myvaluesG: "{% autoescape off %}{{edgegaussian}}{% endautoescape %}",
-	             {% endif %}
-	             action: 'getFriendValues', 
-	          },
-	          success : function(data){
-	            $('#comparemessage').text('');
-	            if (data.value == null) {
-	              $('#comparemessage').text($('#friend option:selected').text() + " has not computed the \"{{indexname}}\" index. Tell him/her to do it immediately!");
-	              if (chartType == 'scatter') drawChart(rowCurUser, 1);
-	              else drawChart(rowCurUserG, 1);
-	            }
-	            else {
-	              $('#friendvalue').text($('#friend option:selected').text() + '\'s value: ' + data.value);
-	            
-	              {% if not nodevalues == None %}
-	           	  eval('newvals = ' + data.nodevalues + ';');
-	           	  eval('newvalsG = ' + data.nodegaussian + ';');  
-	              {% endif %}
-	              {% if not edgevalues == None %}
-	              eval('newvals = ' + data.edgevalues + ';');
-	              eval('newvalsG = ' + data.edgegaussian + ';');
-	              {% endif %}
-	            
-	              rowCurFriend = newvals;
-	              rowCurFriendG = newvalsG;
-	              
-	              if (chartType == 'scatter') drawChart(rowCurFriend, 2);
-	        	  else drawChart(rowCurFriendG, 2);
-                }
-	          },
-	          error : function(XMLHttpRequest, textStatus, errorThrown) {
-	            $('#comparemessage').text("Error while retrieving friends index value.");
-	            if (chartType == 'scatter') drawChart(rowCurUser, 1);
-	        	else drawChart(rowCurUserG, 1);
-	          }
-	        });
-          }
-        });
-      
-        $('#comparelink').click(function() {
-          if ($('#comparediv').is(':hidden')) {
-    	    $('#comparediv').show('slow');
-          } else {
-          	$('#comparediv').hide('fast');
-          }
-          return false;
-        });
-      // -->    	
-      </script>
-      {% endif %}
-    
-      {% if not nodevalues == None %}
-      <p><a id="nodeslink" href="#">Computed values per node</a></p>
-    
-      <div id ="nodevalues">
-        <table id="values" class="longvalues">
-          <thead id="valueshead"><td>Bucket:</td><td># Nodes:</td></thead>
-          {% for bucket in nodevalues %}
-          <tr><td id="value">{{bucket.0}}</td><td id="value">{{bucket.1}}</td></tr>
-          {% endfor %}
-        </table>
-      </div>
-    
-      <script language="javascript">
-      <!--
-        $('#nodeslink').click(function() {
-          if ($('#nodevalues').is(':hidden')) {
-    	    $('#nodevalues').show('slow');
-          } else {
-          	$('#nodevalues').hide('fast');
-          }
-          return false;
-        });
-      // -->    	
-      </script>
-      {% endif %}
-      
-      {% if not edgevalues == None %}
-      <p><a id="edgeslink" href="#">Computed values per edge</a></p>
-      <div id ="edgevalues">
-        <table id="values" class="longvalues">
-          <thead id="valueshead"><td>Bucket:</td><td># Edges:</td></thead>
-          {% for bucket in edgevalues %}
-          <tr><td id="value">{{bucket.0}}</td><td id="value">{{bucket.1}}</td></tr>
-          {% endfor %}
-         </table>
-        </table>
-      </div>
-    
-      <script language="javascript">
-      <!--
-        $('#edgeslink').click(function() {
-          if ($('#edgevalues').is(':hidden')) {
-    	    $('#edgevalues').show('slow');
-          } else {
-          	$('#edgevalues').hide('fast');
-          }
-          return false;
-        });
-      // -->    	
-      </script>
-      {% endif %}
+    <section id="normalsection" class="clearfix">
+      <p class="title">Graphical representation of the "{{indexname}}" sociological index:</p>
     
       {% if not nodevalues == None %}
         <p>Graph of distribution for the node values of this index: <a href="#" id="chartscatter" class="disabled">show scatter chart</a>, <a href="#" id="chartgaussian">show gaussian chart</a>.</p>
-        <div id="chart_nodes_div"></div>
+        <table id="table_nodes"><tr>
+        <td><div id="chart_nodes_div"></div></td>
+        <td>
+          <h3>Your "{{indexname}}" index value:</h3><br/>&nbsp;
+          <span id="indexvalue">{{value|fortmatindex:indexname}}</span>
+          <p>&nbsp;</p>
+          <table><tr>
+          <td><a name="fb_share" type="button" share_url="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}">Share</a>&nbsp;
+          <script src="https://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script></td>
+          <td><a href="https://twitter.com/share" class="twitter-share-button" data-url="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}" data-text="According to Rorschach Test Platform my {{indexname}} index has value {{value|fortmatindex:indexname}}!" data-count="none" data-hashtags="RorschachTestPlatf">Tweet</a>
+		  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></td>
+		  </tr></table>
+		  <h3 id="comparisonvalue"></h3><br/>&nbsp;
+          <span id="friendvalue"></span>
+        </td>
+        </tr></table>
+        
         <script type="text/javascript">
         <!--
           var rowCurUser = {% autoescape off %}{{nodevalues}}{% endautoescape %};
@@ -282,8 +158,24 @@
       {% endif %}
     
       {% if not edgevalues == None %}
-        <p>Graph of distribution for the node values of this index: <a href="#" id="chartscatter" class="disabled">show scatter chart</a>, <a href="#" id="chartgaussian">show gaussian chart</a>.</p>
-        <div id="chart_edges_div"></div>
+        <p>Graph of distribution for the edge values of this index: <a href="#" id="chartscatter" class="disabled">show scatter chart</a>, <a href="#" id="chartgaussian">show gaussian chart</a>.</p>
+        <table id="table_edges"><tr>
+        <td><div id="chart_edges_div"></div></td>
+        <td>
+          <h3>Your "{{indexname}}" index value:</h3><br/>&nbsp;
+          <span id="indexvalue">{{value|fortmatindex:indexname}}</span>
+          <p>&nbsp;</p>
+          <table><tr>
+          <td><a name="fb_share" type="button" share_url="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}">Share</a>&nbsp;
+          <script src="https://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script></td>
+          <td><a href="https://twitter.com/share" class="twitter-share-button" data-url="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}" data-text="According to Rorschach Test Platform my {{indexname}} index has value {{value|fortmatindex:indexname}}!" data-count="none" data-hashtags="RorschachTestPlatf">Tweet</a>
+		  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></td>
+		  </tr></table>
+		  <h3 id="comparisonvalue"></h3><br/>&nbsp;
+          <span id="friendvalue"></span>
+        </td>
+        </tr></table>
+
         <script type="text/javascript">
         <!--
           var rowCurUser = {% autoescape off %}{{edgevalues}}{% endautoescape %};
@@ -377,6 +269,215 @@
         // -->
         </script>
       {% endif %}
+      
+            {% if not code == None and friends != None and friends|length > 0  %}
+      <p>&nbsp;</p>
+      <p><a id="comparelink" href="#">Compare your index value with one of your friends</a></p>
+      
+      <div id ="comparediv">
+        <p>Select the friend from the dropdown list:
+        <select id="friend" name="friend">
+          <option value=""></option>
+          {% for friend in friends %}
+          <option value="{{friend.uid}}">{{friend.name}}</option>
+          {% endfor %}
+        </select> <span id="comparemessage"/></p>
+        <div id="postmessage"></div>
+      </div>
+    
+      <script language="javascript">
+      <!--
+        function sendMessageToFriend(friendId, alreadyComputed) {
+	    	if (alreadyComputed) description = 'Hey, I have compared my {{indexname}} with your using Rorschach Test Platform! Come and check yourself!';
+	    	else description = 'Hey, have you ever heard bout Rorschach Test Platform? You can use this application to calculate different sociological indexes on your Facebook network!';
+	    	popup('{%autoescape off%}{{conf.SEND_TO}}{%endautoescape%}&to=' + friendId + '&description=' + description, 'Send', 580, 400);
+	    }
+      
+        function onlyUserTable() {
+          var tableHtml  = '<table id="values" class="longvalues">';
+	      tableHtml += '<tr id="valueshead"><td colspan="2 align="center">Your values:</td></tr>';
+	              
+	      var myvals = [];
+	      var divTable = '';
+	      {% if not nodevalues == None %}
+		   tableHtml += '<tr id="valueshead"><td>Bucket:</td><td># Nodes:</td></tr>';
+		   divTable = 'nodevalues';
+		   myvals = {% autoescape off %}{{nodevalues}}{% endautoescape %};
+	      {% endif %}
+	      {% if not edgevalues == None %}
+           tableHtml += '<tr id="valueshead"><td>Bucket:</td><td># Edges:</td></tr>';
+           divTable = 'edgevalues';
+           myvals = {% autoescape off %}{{edgevalues}}{% endautoescape %};
+	      {% endif %}
+	            
+	      for (var i = 0; i < myvals.length; i++) {
+	         tableHtml += '<tr>';
+	         tableHtml += '<td id="value">' + myvals[i][0] + '</td><td id="value">' + myvals[i][1] + '</td>';
+	         tableHtml += '</tr>';
+	      }
+	                
+	      tableHtml += '</table>';
+		  $('#' + divTable).html(tableHtml);
+		}
+      
+        $('#friend').change(function() {
+          if ($('#friend option:selected').val() == "") {
+            $('#comparemessage').text('');
+            $('#comparisonvalue').text('');
+            $('#friendvalue').text('');
+            $('#friendlongvalue').text('');
+            $('#postmessage').html('');
+            if (chartType == 'scatter') drawChart(rowCurUser, 1);
+	        else drawChart(rowCurUserG, 1);
+	        onlyUserTable();
+          }
+          else {
+            $('#comparemessage').text('Retrieving ' + $('#friend option:selected').text() + '\'s index...');
+            $('#comparisonvalue').text('');
+            $('#friendvalue').text('');
+            $('#friendlongvalue').text('');
+            $('#postmessage').html('');
+            
+            $.ajax({
+	          type : 'POST',
+	          url : '/index/{{uid}}/{{indexname}}',
+	          dataType : 'json',
+	          data: {
+	             code : '{{code}}',
+	             frienduid: $('#friend option:selected').val(),
+	             {% if not nodevalues == None %}
+	             myvalues: "{% autoescape off %}{{nodevalues}}{% endautoescape %}",
+	             myvaluesG: "{% autoescape off %}{{nodegaussian}}{% endautoescape %}",
+	             {% endif %}
+	             {% if not edgevalues == None %}
+	             myvalues: "{% autoescape off %}{{edgevalues}}{% endautoescape %}",
+	             myvaluesG: "{% autoescape off %}{{edgegaussian}}{% endautoescape %}",
+	             {% endif %}
+	             action: 'getFriendValues', 
+	          },
+	          success : function(data){
+	            $('#comparemessage').text('');
+	            if (data.value == null) {
+	              var friendName = $('#friend option:selected').text();
+	              var friendId = $('#friend option:selected').val();
+	              $('#comparemessage').html(friendName + " has not computed the \"{{indexname}}\" index. <a href=\"#\" onclick=\"sendMessageToFriend('" + friendId + "', false); return false;\">Tell him/her to do it immediately</a>!");
+	              if (chartType == 'scatter') drawChart(rowCurUser, 1);
+	              else drawChart(rowCurUserG, 1);
+	              onlyUserTable();
+	            }
+	            else {
+	              var friendName = $('#friend option:selected').text();
+	              var friendId = $('#friend option:selected').val();
+	              $('#comparisonvalue').text($('#friend option:selected').text() + '\'s "{{indexname}}" index value:');
+	              $('#friendvalue').text(data.value);
+	              $('#friendlongvalue').text($('#friend option:selected').text() + '\'s long index value for the "{{indexname}}" sociological index: ' + data.longvalue);
+	              $('#postmessage').html("Share this comparison result for the {{indexname}} index on <a href=\"#\" onclick=\"sendMessageToFriend('" + friendId + "', true); return false;\">" + friendName + " wall!</a>");
+	            
+	              var tableHtml  = '<table id="values" class="longvalues">';
+	              tableHtml += '<tr id="valueshead"><td colspan="2 align="center">Your values:</td><td style="width:100px">&nbsp;</td><td colspan="2" align="center">Friend\'s values</td></tr>';
+	              
+	              var divTable = '';
+	              {% if not nodevalues == None %}
+	           	  eval('newvals = ' + data.nodevalues + ';');
+	           	  eval('newvalsG = ' + data.nodegaussian + ';');
+		          tableHtml += '<tr id="valueshead"><td>Bucket:</td><td># Nodes:</td><td style="width:100px">&nbsp;</td><td>Bucket:</td><td># Nodes:</td></tr>';
+		          divTable = 'nodevalues';
+	              {% endif %}
+	              {% if not edgevalues == None %}
+	              eval('newvals = ' + data.edgevalues + ';');
+	              eval('newvalsG = ' + data.edgegaussian + ';');
+          		  tableHtml += '<tr id="valueshead"><td>Bucket:</td><td># Edges:</td><td style="width:100px">&nbsp;</td><td>Bucket:</td><td># Edges:</td></tr>';
+          		  divTable = 'edgevalues';
+	              {% endif %}
+	              
+	              for (var i = 0; i < newvals.length; i++) {
+	              	tableHtml += '<tr>';
+	              	tableHtml += '<td id="value">' + newvals[i][0] + '</td><td id="value">' + newvals[i][1] + '</td>';
+	              	tableHtml += '<td style="width:100px">&nbsp;</td>';
+	              	tableHtml += '<td id="value">' + newvals[i][0] + '</td><td id="value">' + newvals[i][2] + '</td>';
+	              	tableHtml += '</tr>';
+	              }
+	                
+	              tableHtml += '</table>';
+		          $('#' + divTable).html(tableHtml);
+	              rowCurFriend = newvals;
+	              rowCurFriendG = newvalsG;
+	              
+	              if (chartType == 'scatter') drawChart(rowCurFriend, 2);
+	        	  else drawChart(rowCurFriendG, 2);
+                }
+	          },
+	          error : function(XMLHttpRequest, textStatus, errorThrown) {
+	            $('#comparemessage').text("Error while retrieving friends index value.");
+	            if (chartType == 'scatter') drawChart(rowCurUser, 1);
+	        	else drawChart(rowCurUserG, 1);
+	          }
+	        });
+          }
+        });
+      
+        $('#comparelink').click(function() {
+          if ($('#comparediv').is(':hidden')) {
+    	    $('#comparediv').show('slow');
+          } else {
+          	$('#comparediv').hide('fast');
+          }
+          return false;
+        });
+      // -->    	
+      </script>
+      {% endif %}
+    </section>
+    
+    <section id="normalsection" class="clearfix">
+      <p class="title">Numerical data for the "{{indexname}}" sociological index:</p>
+      <p>Your long index value for the "{{indexname}}" sociological index: {{value}}</p>
+      <p><span id="friendlongvalue"></span></p>
+    
+      {% if not nodevalues == None %}
+      <p>Computed values per node</p>
+    
+      <div id="nodevalues">
+        <table id="values" class="longvalues">
+          <tr id="valueshead"><td colspan="2" align="center">Your values:</td></tr>
+          <tr id="valueshead"><td>Bucket:</td><td># Nodes:</td></tr>
+          {% for bucket in nodevalues %}
+          <tr><td id="value">{{bucket.0}}</td><td id="value">{{bucket.1}}</td></tr>
+          {% endfor %}
+        </table>
+      </div>    
+      {% endif %}
+      
+      {% if not edgevalues == None %}
+      <p>Computed values per edge</p>
+      
+      <div id ="edgevalues">
+        <table id="values" class="longvalues">
+          <tr id="valueshead"><td colspan="2 align="center">Your values:</td></tr>
+          <tr id="valueshead"><td>Bucket:</td><td># Edges:</td></tr>
+          {% for bucket in edgevalues %}
+          <tr><td id="value">{{bucket.0}}</td><td id="value">{{bucket.1}}</td></tr>
+          {% endfor %}
+         </table>
+      </div>
+    
+      {% endif %}
+    </section>    
+    
+    <section id="normalsection" class="clearfix">
+    <p><div class="fb-comments" data-href="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}" data-num-posts="2" data-width="740"></div></p>
+    <script type="text/javascript">
+    <!--
+    var head = $("head").get(0);  // using jquery
+	var script2 = document.createElement("script");
+	if (!$.browser.msie ) {
+	    script2.innerHTML = "window.FB = null;FB=null;";
+	}else{
+	    script2.text = "window.FB = null;FB=null;";
+	}
+	head.appendChild(script2);
+    // -->
+    </script>
     </section>
     
     <script type="text/javascript">

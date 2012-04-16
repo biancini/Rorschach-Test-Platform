@@ -16,6 +16,9 @@ def get_user_agent(request):
         headers.get('HTTP_USER_AGENT', '') or \
         headers.get('USER_AGENT', '') or \
         headers.get('USER-AGENT', '')
+        
+def isDesktop(request):
+    return not bool(RE_MOBILE.search(get_user_agent(request)))
 
 def getsession(self, access_token=None, redirect_uri=None):
     session = get_current_session()
@@ -48,7 +51,7 @@ def getsession(self, access_token=None, redirect_uri=None):
             session['me'] = me
             session['appid'] = appid
             session['app_token'] = app_token
-            session['isdesktop'] = not bool(RE_MOBILE.search(get_user_agent(self.request)))
+            session['isdesktop'] = isDesktop(self.request)
             
             session['roles'] = ['user']
             if 'administrators' in (roles or []) or 'insights' in (roles or []):

@@ -1,6 +1,6 @@
     <header class="clearfix">
       <p id="picture" style="background-image: url(static/images/macchie.jpg); background-size: 64px 64px"></p>
-      <h1>Rorschach Test Platform, welcome <strong>{{me.name}}</strong>!</strong></h1>
+      <h1>Rorschach Test Platform, welcome <strong>{{me.name}}</strong>!</h1>
       <p class="tagline">
         Navigation
         <span><a href="/?code={{code}}">Home</a></span>
@@ -36,14 +36,15 @@
         });
       // -->
       </script>
-      <p id="picture" style="background-image: url(https://graph.facebook.com/me/picture?type=square&access_token={{token}})"></p>
+      <p id="picture" style="background-image: url(/static/images/profile.png)"></p>
 	  <p><strong>{{me.first_name}}</strong>, it is strongly suggested you check your profile and verify it has been completely computed and it is up to date.</p>            
       <p>The profile is really important for the evaluating testing results and must kept up to date.</p>
       If you think something relevant changed in your FB network, recompute your profile!</p>
-        
+      
       <p class="button"><a href="/profile?code={{code}}" class="facebook-button">
         <span class="plus">View or compute your profile</span>
       </a></p>
+      <p><div class="fb-comments" data-href="{{conf.BASE_URL}}profile" data-num-posts="2" data-width="740"></div></p>
     </section>
 
     <section id="normalsection" class="clearfix">
@@ -121,3 +122,4 @@
         {% endif %}
       </div>
     </section>
+    

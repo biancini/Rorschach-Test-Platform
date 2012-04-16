@@ -81,7 +81,15 @@ class MainPage(webapp2.RequestHandler):
             self.response.out.write(template.render(os.path.join(root, 'pages/templates/profile.html'), template_values))
             self.response.out.write(template.render(os.path.join(root, 'templates/_footer.html'), template_values))
         else:
-            self.redirect(fbutils.oauth_login_url(self=self, next_url=fbutils.base_url(self)))
+            template_values = {
+                'title': 'Rorschach Test Platform',
+                'page' : 'Profile',
+                'conf': conf,
+                'isdesktop': sessionmanager.isDesktop(self.request),
+                'loginurl' : fbutils.oauth_login_url(self=self, next_url=fbutils.base_url(self)) }
+            
+            root = os.path.normpath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+            self.response.out.write(template.render(os.path.join(root, 'pages/templates/nologin.html'), template_values))
 
     def get(self):
         self.renderPage()

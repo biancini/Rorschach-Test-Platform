@@ -1,12 +1,10 @@
 import webapp2
-import os, sys
-import gaesessions
+import os
 import pickle
 
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from Cookie import SimpleCookie
-from base64 import b64decode
 
 from utils import conf, sessionmanager
 
@@ -22,26 +20,6 @@ def decode_data(pdump):
         eO = {}
     return eO
 
-def printdict(dictin, indent=0):
-    strprint = '{\n'
-    indentstr = ''
-    for i in range(0, indent+1): indentstr += '  '
-    
-    for k, v in dictin.iteritems():
-        strprint += indentstr + '\'' + str(k) + '\': '
-        if type(v).__name__=='dict':
-            strprint += printdict(v, indent+1) + '\n'
-        elif type(v).__name__=='str' or type(v).__name__=='unicode':
-            strprint += '\'' + v + '\'\n'
-        else:
-            #logging.info(type(v).__name__)
-            strprint += str(v) + ',\n'
-    
-    indentstr = ''        
-    for i in range(0, indent): indentstr += '  '        
-    strprint = strprint[:-2] + '\n' + indentstr + '}'
-    return strprint 
-
 class MainPage(webapp2.RequestHandler):
     def renderPage(self):
         cookie = SimpleCookie(os.environ['HTTP_COOKIE'])
@@ -51,31 +29,11 @@ class MainPage(webapp2.RequestHandler):
             self.response.out.write('No session yet')
             return
         self.cookie_keys.sort()
-        data = ''.join(cookie[k].value for k in self.cookie_keys)
-        printout += data + '\n\n\n'
         
-        i = gaesessions.SIG_LEN + gaesessions.SID_LEN
-        sig, b64pdump = data[:gaesessions.SIG_LEN], data[i:]
-        printout += 'sig = ' + sig + '\n'
-        b64pdump += "=" * ((4 - len(b64pdump) % 4) % 4)
-        printout += 'len = ' + str(len(b64pdump)) + '\n'
-        printout += 'padding = ' + str(((4 - len(b64pdump) % 4) % 4)) + '\n\n'
         
-        try:
-            pdump = b64decode(b64pdump)
+        for k in self.cookie_keys:
+            printout += '%s = %s\n' % (k, cookie[k].value)
             
-            if pdump:
-                printout += printdict(decode_data(pdump))
-            else:
-                printout += 'data is in memcache/db: load it on-demand'
-        except:
-            lens = len(b64pdump)
-            lenx = lens - (lens % 4 if lens % 4 else 4)
-            try:
-                printout += b64decode(b64pdump[:lenx])
-            except:
-                printout += str(sys.exc_info())
-        
         session = sessionmanager.getsession(self)
         
         template_values = {

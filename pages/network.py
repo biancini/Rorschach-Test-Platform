@@ -30,7 +30,7 @@ class MainPage(webapp2.RequestHandler):
                 q = db.GqlQuery("SELECT * FROM Index " +
                                 "WHERE uid = :1 " +
                                 "ORDER BY updated_time DESC",
-                                session['me']['id'])
+                                frienduid)
                 
                 q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", frienduid)
                 network = q.fetch(1)
@@ -72,7 +72,7 @@ class MainPage(webapp2.RequestHandler):
             q = db.GqlQuery("SELECT * FROM Index " +
                             "WHERE uid = :1 " +
                             "ORDER BY updated_time DESC",
-                            session['me']['id'])
+                            uid)
             
             q = db.GqlQuery("SELECT * FROM Network WHERE uid = :1", uid)
             network = q.fetch(1)
@@ -107,7 +107,7 @@ class MainPage(webapp2.RequestHandler):
         template_values = {
             'conf': conf,
             'uid': uid,
-            'me': session['me'],
+            'me': session and session['me'] or None,
             'nodes': nodes,
             'edges': edges,
             'league': league,

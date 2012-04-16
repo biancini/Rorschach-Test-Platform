@@ -30,8 +30,7 @@ class MainPage(webapp2.RequestHandler):
             if value[1] == 0: zeroes += 1
             else: moltiplicand += value[1]
             
-            for i in range(value[1]):
-                vals.append(value[0])
+            for i in range(value[1]): vals.append(value[0])
         
         moltiplicand = moltiplicand + zeroes * moltiplicand / (len(values) - zeroes)
         sigma = np.std(vals)
@@ -81,17 +80,17 @@ class MainPage(webapp2.RequestHandler):
         except:
             session.terminate()
             session = None
-            
+        
         action = self.request.get('action', None)
         if session and action == 'getFriendValues':
             objreturn = {}
-            indexes = cache.get("%s_indexes" % uid)
+            indexes = cache.get("%s_indexes" % frienduid)
             if indexes == None:
                 indexes = {}
                 q = db.GqlQuery("SELECT * FROM Index " +
                                 "WHERE uid = :1 " +
                                 "ORDER BY updated_time DESC",
-                                uid)
+                                frienduid)
             
                 for index in q:            
                     if not index.networkhash == None and \
@@ -99,14 +98,15 @@ class MainPage(webapp2.RequestHandler):
                     not index.name in indexes.keys():
                         indexes[index.name] = index
                         
-                cache.add("%s_indexes" % uid, indexes, 60*60)
+                cache.add("%s_indexes" % frienduid, indexes, 60*60)
                 
             index = None
             for curindex in indexes.values():
                 if curindex.name == indexname: index = curindex
             
             if index:
-                objreturn['value'] = index.value
+                objreturn['value'] = conf.INDEX_TYPES[indexname] % index.value
+                objreturn['longvalue'] = index.value
                 newvalues = self.setcentiles(index.get_nodevalues())
                 if newvalues != None: objreturn['nodevalues'] = str(self.mergevalues(myvalues, newvalues))
                 else: objreturn['nodevalues'] = str(newvalues)
@@ -122,8 +122,8 @@ class MainPage(webapp2.RequestHandler):
                 else: objreturn['edgegaussian'] = str(newgaussian)
             else:
                 objreturn['value'] = None
+                objreturn['longvalue'] = None
             
-                
             self.response.out.write(json.dumps(objreturn))
         else:
             self.response.out.write("Error, session invalid or invalid action.")

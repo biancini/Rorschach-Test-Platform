@@ -73,11 +73,23 @@ class MainPage(webapp2.RequestHandler):
         if myvaluesG != None: myvaluesG = eval(myvaluesG)
         
         session = sessionmanager.getsession(self)
-        try:
-            if session['me']['id'] != uid:
-                session.terminate()
-                session = None
-        except:
+        
+        can_continue = False
+        if session == None:
+            app_friends = None
+            can_continue = True
+        else:
+            if uid == session['me']['id']: can_continue = True
+            else:
+                app_friends = fbutils.fql("SELECT uid, name, is_app_user " +
+                                          "FROM user " +
+                                          "WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user = 1 " +
+                                          "ORDER BY name", session['access_token'])
+            
+                for friend in app_friends:
+                    if str(friend['uid']) == str(uid): can_continue = True
+        
+        if not can_continue:
             session.terminate()
             session = None
         
@@ -139,9 +151,6 @@ class MainPage(webapp2.RequestHandler):
         edgegaussian = None
         
         session = sessionmanager.getsession(self)
-        try:
-            if session['me']['id'] != uid: code = None
-        except: code = None
                         
         indexes = cache.get("%s_indexes" % uid)
         if indexes == None:
@@ -169,35 +178,44 @@ class MainPage(webapp2.RequestHandler):
             edgevalues = self.setcentiles(index.get_edgevalues())
             nodegaussian = self.getgaussian(nodevalues)
             edgegaussian = self.getgaussian(edgevalues)
-            
+        
+        can_continue = False
         if session == None:
             app_friends = None
+            can_continue = True
         else:
             app_friends = fbutils.fql("SELECT uid, name, is_app_user " +
                                       "FROM user " +
                                       "WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user = 1 " +
                                       "ORDER BY name", session['access_token'])
+            
+            if uid == session['me']['id']: can_continue = True
+            else:
+                for friend in app_friends:
+                    if str(friend['uid']) == str(uid):
+                        can_continue = True
         
-        template_values = {
-            'conf': conf,
-            'indexname': indexname,
-            'description': conf.INDEXES[indexname],
-            'uid': uid,
-            'index': index,
-            'nodevalues': nodevalues,
-            'edgevalues': edgevalues,
-            'nodegaussian': nodegaussian,
-            'edgegaussian': edgegaussian,
-            'value': value,
-            'friends': app_friends,
-            'isdesktop': session and session['isdesktop'] or False,
-            'header': 'sociologicalindex',
-            'code': code }
-        
-        root = os.path.normpath(os.path.join(os.path.dirname(__file__), os.path.pardir))
-        self.response.out.write(template.render(os.path.join(root, 'templates/_header.html'), template_values))
-        self.response.out.write(template.render(os.path.join(root, 'pages/templates/sociologicalindex.html'), template_values))
-        self.response.out.write(template.render(os.path.join(root, 'templates/_footer.html'), template_values))
+        if can_continue:
+            template_values = {
+                'conf': conf,
+                'indexname': indexname,
+                'description': conf.INDEXES[indexname],
+                'uid': uid,
+                'index': index,
+                'nodevalues': nodevalues,
+                'edgevalues': edgevalues,
+                'nodegaussian': nodegaussian,
+                'edgegaussian': edgegaussian,
+                'value': value,
+                'friends': app_friends,
+                'isdesktop': session and session['isdesktop'] or False,
+                'header': 'sociologicalindex',
+                'code': code }
+            
+            root = os.path.normpath(os.path.join(os.path.dirname(__file__), os.path.pardir))
+            self.response.out.write(template.render(os.path.join(root, 'templates/_header.html'), template_values))
+            self.response.out.write(template.render(os.path.join(root, 'pages/templates/sociologicalindex.html'), template_values))
+            self.response.out.write(template.render(os.path.join(root, 'templates/_footer.html'), template_values))
 
     def get(self, uid, index):
         self.renderPage(uid, index)

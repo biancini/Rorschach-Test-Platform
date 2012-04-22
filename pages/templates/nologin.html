@@ -1,5 +1,64 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta HTTP-EQUIV="REFRESH" content="0; url={{loginurl}}" />
+	<meta charset="utf-8" />
+	<meta HTTP-EQUIV="REFRESH" content="0; url={{loginurl}}" />
+	<meta property="fb:admins" content="500674896"/>
+	{% if page == 'Home' %}
+    <meta property="og:url" content="{{conf.BASE_URL}}" />
+    <meta property="og:title" content="{{title}}" />
+    {% endif %}
+    {% if page == 'Profile' %}
+    <meta property="og:url" content="{{conf.BASE_URL}}/profile" />
+    <meta property="og:title" content="{{title}} - {{page}}" />
+    {% endif %}
+    {% if page == 'Test Admin' %}
+    <meta property="og:url" content="{{conf.BASE_URL}}/admin" />
+    <meta property="og:title" content="{{title}} - {{page}}" />
+    {% endif %}
+    <title>{{title}} - {{page}}</title>
+    <link href="/static/styles/reset.css" media="screen" rel="stylesheet" />
+  	{% if isdesktop %}
+      <link href="/static/styles/base.css" media="screen" rel="stylesheet" />
+    {% else %}
+      <link href="/static/styles/mobile.css" media="screen" rel="stylesheet"  />
+    {% endif %}
+    
+    
+	<script type="text/javascript">
+	<!--
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-256445-3']);
+	_gaq.push(['_trackPageview']);
+	
+	(function() {
+	  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+	// -->
+	</script>
 </head>
+<body>
+    <header class="clearfix">
+      <p id="picture" style="background-image: url(static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Rorschach Test Platform, <strong>you are not logged in</strong>.</h1>
+      <p class="tagline">
+        Navigation
+        <span><a href="/">Home</a></span>
+        {% if page == 'Profile' %}
+        <span><a href="/profile">Profile</a></span>
+        {% endif %}
+        {% if page == 'Test Admin' %}
+        <span><a href="/admin">Admin</a></span>
+        {% endif %}
+      </p>
+      <div id="share-app">
+        <ul>
+          <li><a class="facebook-button" href="#" onclick="alert('You must login with Facebook to post to your wall...'); return false;"><span class="plus">Post to Wall</span></a></li>
+          <li><a class="facebook-button speech-bubble" href="#" onclick="alert('You must login with Facebook to send this link to one of your friends...'); return false;"><span class="speech-bubble">Send to Friends</span></a></li>
+        </ul>
+      </div>
+    </header>
+</body>
 </html>

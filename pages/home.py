@@ -61,8 +61,8 @@ class MainPage(webapp2.RequestHandler):
                     curuser.username = session['me']['username']
                 curuser.updated_time = datefb
                 curuser.put()
-                session['me']['first_name']
-              
+                users = cache.delete("users")
+                
                 logging.info('User added: ' + session['me']['id'])
 
             indexes = cache.get("%s_indexes" % session['me']['id'])

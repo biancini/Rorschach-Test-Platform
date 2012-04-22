@@ -14,6 +14,7 @@ routes = []
 routes.append(('/', home.MainPage));
 routes.append(('/robots.txt', robots.MainPage))
 routes.append(('/profile', profile.MainPage))
+routes.append(('/profile/(\w+)', profile.MainPage))
 routes.append(('/pagetab', pagetab.MainPage))
 routes.append(('/index/(\w+)/(\w+)', sociologicalindex.MainPage))
 routes.append(('/network/(\w+)', network.MainPage))

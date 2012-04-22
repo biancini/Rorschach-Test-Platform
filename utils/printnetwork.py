@@ -36,7 +36,7 @@ class MainPage(webapp2.RequestHandler):
                         network = network[0]
                         cache.add("%s_network" % uid, network, 60*60)
         
-                if network == 0:
+                if network:
                     graph = loadGraph(network.getnodes(), network.getedges())
                     
                     strpage = ''

@@ -26,17 +26,30 @@ def hasattribute(value, arg):
     return hasattr(value, str(arg))
 
 class MainPage(webapp2.RequestHandler):
-    def renderPage(self):
+    def renderPage(self, requesteduid=None):
         session = sessionmanager.getsession(self)
         
         if session:
-            indexesList = cache.get("%s_indexes" % session['me']['id'])
+            if not requesteduid: requesteduid = session['me']['id']
+            
+            users = cache.get("users")
+            if users == None:
+                users = []
+                q = db.GqlQuery("SELECT * FROM User")
+                for user in q: users.append(user)
+                cache.add("users", users)
+            
+            requesteduser = None
+            for user in users:
+                if user.uid == requesteduid: requesteduser = user
+            
+            indexesList = cache.get("%s_indexes" % requesteduid)
             if indexesList == None:
                 indexesList = {}
                 q = db.GqlQuery("SELECT * FROM Index " +
                                 "WHERE uid = :1 " +
                                 "ORDER BY updated_time DESC",
-                                session['me']['id'])
+                                requesteduid)
             
                 for index in q:            
                     if not index.networkhash == None and \
@@ -44,7 +57,7 @@ class MainPage(webapp2.RequestHandler):
                     not index.name in indexesList:
                         indexesList[index.name] = index
                         
-                cache.add("%s_indexes" % session['me']['id'], indexesList, 60*60)
+                cache.add("%s_indexes" % requesteduid, indexesList, 60*60)
                 
             indexes = {}
             for index in indexesList.values():
@@ -67,6 +80,7 @@ class MainPage(webapp2.RequestHandler):
                 'conf': conf,
                 'me': session['me'],
                 'roles': session['roles'],
+                'requesteduser': requesteduser,
                 'computedindexes': indexes,
                 'numindexes': len(conf.INDEXES),
                 'index_groups': conf.INDEX_GROUPS,
@@ -91,8 +105,8 @@ class MainPage(webapp2.RequestHandler):
             root = os.path.normpath(os.path.join(os.path.dirname(__file__), os.path.pardir))
             self.response.out.write(template.render(os.path.join(root, 'pages/templates/nologin.html'), template_values))
 
-    def get(self):
-        self.renderPage()
+    def get(self, requesteduid=None):
+        self.renderPage(requesteduid)
 
-    def post(self):
-        self.renderPage()
+    def post(self, requesteduid=None):
+        self.renderPage(requesteduid)

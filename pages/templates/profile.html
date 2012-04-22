@@ -39,12 +39,12 @@
     </script>
 
     <header class="clearfix">
-      <p id="picture" style="background-image: url(static/images/macchie.jpg); background-size: 64px 64px"></p>
-      <h1>Profile page for <strong>{{me.name}}</strong></h1>
+      <p id="picture" style="background-image: url(/static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <h1>Profile page for <strong>{{requesteduser.first_name}} {{requesteduser.last_name}}</strong></h1>
       <p class="tagline">
         Navigation
         <span><a href="/?code={{code}}">Home</a></span>
-        <span><a href="/profile?code={{code}}">Profile</a></span>
+        <span><a href="/profile/{{requesteduser.uid}}?code={{code}}">Profile</a></span>
       </p>
       <div id="share-app">
         <ul>
@@ -54,7 +54,7 @@
       </div>
     </header>
     <section id="normalsection" class="clearfix">
-      <h3>{{me.first_name}}'s profile (you have computed <span id="tot_num">{{computedindexes|length}}</span> index{% if computedindexes|length != 1 %}es{% endif %} over {{numindexes}} <span class="bulletchart">{{computedindexes|length}}, {{numindexes}}, {{computedindexes|length}}</span>)</h3>
+      <h3>{{requesteduser.first_name}}'s profile (you have computed <span id="tot_num">{{computedindexes|length}}</span> index{% if computedindexes|length != 1 %}es{% endif %} over {{numindexes}} <span class="bulletchart">{{computedindexes|length}}, {{numindexes}}, {{computedindexes|length}}</span>)</h3>
       <script type="text/javascript">
       <!--
         $(document).ready(function() {
@@ -63,23 +63,23 @@
       // -->
       </script>
       <p id="picture" style="background-image: url(/static/images/profile.png)"></p>
-	  <p><strong>{{me.first_name}}</strong>, it is strongly suggested you check your profile and verify it has been completely computed and it is up to date.</p>            
+	  <p><strong>{{requesteduser.first_name}}</strong>, it is strongly suggested you check your profile and verify it has been completely computed and it is up to date.</p>            
       <p>The profile is really important for the evaluating testing results and must kept up to date.</p>
       If you think something relevant changed in your FB network, recompute your profile!</p>
       <p>In the rest of this page, you will find all the computed indexes for your profile and their values.</p>
       <p>Indexes are computed on your FB contact network, to have see some relevant information about your FB network click the button below.</p>
       <p class="button" id="{{indexname}}_button"">
-        <a href="network/{{me.id}}?code={{code}}" id="{{indexname}}_compute" class="facebook-button">
+        <a href="/network/{{requesteduser.uid}}?code={{code}}" id="{{indexname}}_compute" class="facebook-button">
         <span class="plus" id="{{indexname}}_text">View network data</span></a>
       </p>
       
-      <p><div class="fb-comments" data-href="{{conf.BASE_URL}}profile" data-num-posts="2" data-width="740"></div></p>
+      <p><div class="fb-comments" data-href="{{conf.BASE_URL}}profile/{{requesteduser.uid}}" data-num-posts="2" data-width="740"></div></p>
     </section>
  
     {% for group in index_groups|dictsort:"order" %}
     <section id="normalsection" class="clearfix">
-      <h3>{{me.first_name}}'s {{group.name}} indexes (you have computed <span id="{{group.name}}_num">{{computed_groups|keyfromdict:group.name}}</span> index{% if computedindexes|length != 1 %}es{% endif %} over {{group.indexes|length}} <span class="{{group.name}}_bulletchart">{{computed_groups|keyfromdict:group.name}}, {{group.indexes|length}}, {{computed_groups|keyfromdict:group.name}}</span>)
-      <span class="right">(<a href="#" id="{{group.name}}_compute">compute group</a>)</span></h3>
+      <h3>{{requesteduser.first_name}}'s {{group.name}} indexes (you have computed <span id="{{group.name}}_num">{{computed_groups|keyfromdict:group.name}}</span> index{% if computedindexes|length != 1 %}es{% endif %} over {{group.indexes|length}} <span class="{{group.name}}_bulletchart">{{computed_groups|keyfromdict:group.name}}, {{group.indexes|length}}, {{computed_groups|keyfromdict:group.name}}</span>)
+      {% if requesteduser.uid == me.id %}<span class="right">(<a href="#" id="{{group.name}}_compute">compute group</a>)</span>{% endif %}</h3>
       <script type="text/javascript">
       <!--
         $(document).ready(function() {
@@ -89,31 +89,35 @@
       </script>
       {% for indexname in group.indexes %}
         {% if not indexname in computedindexes %}
-            <p class="picturegraph"><a href="index/{{me.id}}/{{indexname}}?code={{code}}"><img id="{{indexname}}_image" src="static/images/notcomputed.jpg" style="width: 80px; height: 80px"></a></p>
+            <p class="picturegraph"><a href="/index/{{requesteduser.uid}}/{{indexname}}?code={{code}}"><img id="{{indexname}}_image" src="/static/images/notcomputed.jpg" style="width: 80px; height: 80px"></a></p>
             <div class="indexvalue">
               <p id="{{indexname}}_title" class="strong">{{ indexname|title }}</p>
               <p>{{ index_names|keyfromdict:indexname }}</p>
               <p>&nbsp;</p>
-              <p id="{{indexname}}_message">You do not have a value computed for this index yet.</p>
+              <p id="{{indexname}}_message">A value computed for this index has not been computed yet.</p>
+              {% if requesteduser.uid == me.id %}
               <p class="button" id="{{indexname}}_button"">
                 <a href="#" id="{{indexname}}_compute" class="facebook-button">
                 <span class="plus" id="{{indexname}}_text">Compute your index</span></a>
               </p>
+              {% endif %}
             </div>
          {% else %}
-            <p class="picturegraph"><a href="index/{{me.id}}/{{indexname}}?code={{code}}"><img id="{{indexname}}_image" src="smallgraph/{{me.id}}/{{indexname}}" style="width: 80px; height: 80px"></a></p>
+            <p class="picturegraph"><a href="/index/{{requesteduser.uid}}/{{indexname}}?code={{code}}"><img id="{{indexname}}_image" src="/smallgraph/{{requesteduser.uid}}/{{indexname}}" style="width: 80px; height: 80px"></a></p>
             <div class="indexvalue">
               <p id="{{indexname}}_title" class="computed">{{ indexname|title }}</p>
               <p>{{ index_names|keyfromdict:indexname }}</p>
               <p>&nbsp;</p>
               <p id="{{indexname}}_message" class="computed">The computed value for {{ indexname }} is {{ computedindexes|keyfromdict:indexname }} (
-                <a href='index/{{me.id}}/{{indexname}}?code={{code}}'>view</a>, 
-                <a href='#' onclick="post_wall('{{indexname}}', '{{ computedindexes|keyfromdict:indexname }}')">post to wall</a>
+                <a href='/index/{{requesteduser.uid}}/{{indexname}}?code={{code}}'>view</a>{% if requesteduser.uid == me.id %}, 
+                <a href='#' onclick="post_wall('{{indexname}}', '{{ computedindexes|keyfromdict:indexname }}')">post to wall</a>{% endif %}
               ).</p>
+              {% if requesteduser.uid == me.id %}
               <p class="button" id="{{indexname}}_button">
                 <a href="#" id="{{indexname}}_compute" class="facebook-button">
                 <span class="plus" id="{{indexname}}_text">Re-compute your index</span></a>
               </p>
+              {% endif %}
             </div>
          {% endif %}
          
@@ -130,7 +134,7 @@
               url : 'computeprofileindex',
               dataType : 'json',
               data: {
-            	id : "{{me.id}}",
+            	id : "{{requesteduser.uid}}",
                 code : "{{code}}",
                 index : "{{indexname}}"
               },
@@ -146,9 +150,9 @@
                     $('#{{indexname}}_title').removeClass().addClass('computed');
                     $('#{{indexname}}_message').removeClass().addClass('computed');
                     $('#{{indexname}}_message').html(data.msg +
-                   	  " (<a href='index/{{me.id}}/{{indexname}}?code={{code}}'>view</a>," + 
-                   	  " <a href='#' onclick=\"post_wall(indexname, '" + data.value + "')\">post to wall</a>)");
-                    $('#{{indexname}}_image').attr('src', '{{conf.BASE_URL}}smallgraph/{{me.id}}/{{indexname}}');
+                   	  " (<a href='/index/{{requesteduser.uid}}/{{indexname}}?code={{code}}'>view</a>{% if requesteduser.uid == me.id %}," + 
+                   	  " <a href='#' onclick=\"post_wall(indexname, '" + data.value + "')\">post to wall</a>){% endif %}");
+                    $('#{{indexname}}_image').attr('src', '{{conf.BASE_URL}}smallgraph/{{requesteduser.uid}}/{{indexname}}');
                     
                     computeIndex('{{group.name}}', '{{indexname}}');
                 }
@@ -181,7 +185,7 @@
                 url : 'computeprofileindex',
                 dataType : 'json',
                 data: {
-                   id : "{{me.id}}",
+                   id : "{{requesteduser.uid}}",
                    code : "{{code}}",
                    indexgroup : "{{group.name}}"
                 },
@@ -203,7 +207,7 @@
                       else {
                          $('#' + indexname + '_title').removeClass().addClass('computed');
                          $('#' + indexname + '_message').removeClass().addClass('computed');
-                         $('#' + indexname + '_image').attr('src', '{{conf.BASE_URL}}smallgraph/{{me.id}}/' + indexname);
+                         $('#' + indexname + '_image').attr('src', '{{conf.BASE_URL}}smallgraph/{{requesteduser.uid}}/' + indexname);
                       }
  
                       $('#' + indexname + '_text').text('Re-compute your index');

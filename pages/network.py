@@ -17,9 +17,19 @@ class MainPage(webapp2.RequestHandler):
         frienduid = self.request.get('frienduid', None)
         
         session = sessionmanager.getsession(self)
-        try:
-            if session['me']['id'] != uid: code = None
-        except: code = None
+        can_continue = False
+        if not session == None:
+            if uid == session['me']['id']: can_continue = True
+            else:
+                app_friends = fbutils.fql("SELECT uid, name, is_app_user " +
+                                          "FROM user " +
+                                          "WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user = 1 " +
+                                          "ORDER BY name", session['access_token'])
+            
+                for friend in app_friends:
+                    if str(friend['uid']) == str(uid): can_continue = True
+        
+        if not can_continue: code = None
             
         action = self.request.get('action', None)
         if code != None and action == 'getFriendValues':
@@ -57,10 +67,23 @@ class MainPage(webapp2.RequestHandler):
     def renderPage(self, uid):
         code = self.request.get('code', None)
         
+        can_continue = False
         session = sessionmanager.getsession(self)
-        try:
-            if session['me']['id'] != uid: code = None
-        except: code = None
+        if session == None:
+            app_friends = None
+            can_continue = True
+        else:
+            app_friends = fbutils.fql("SELECT uid, name, is_app_user " +
+                                      "FROM user " +
+                                      "WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user = 1 " +
+                                      "ORDER BY name", session['access_token'])
+            
+            if uid == session['me']['id']: can_continue = True
+            else:
+                for friend in app_friends:
+                    if str(friend['uid']) == str(uid): can_continue = True
+        
+        if not can_continue: code = None
         
         nodes = None
         edges = None

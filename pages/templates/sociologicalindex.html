@@ -4,7 +4,7 @@
       <p class="tagline">
         Navigation
         <span><a href="/?code={{code}}">Home</a></span>
-        <span><a href="/profile?code={{code}}">Profile</a></span>
+        <span><a href="/profile/{{uid}}?code={{code}}">Profile</a></span>
         <span><a href="/index/{{uid}}/{{indexname}}?code={{code}}">{{indexname|title}} Index</a></span>
       </p>
       <div id="share-app">
@@ -54,8 +54,7 @@
           <span id="indexvalue">{{value|fortmatindex:indexname}}</span>
           <p>&nbsp;</p>
           <table><tr>
-          <td><a name="fb_share" type="button" share_url="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}">Share</a>&nbsp;
-          <script src="https://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script></td>
+          <td><a name="fb_share" type="button" share_url="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}">Share</a>&nbsp;</td>
           <td><a href="https://twitter.com/share" class="twitter-share-button" data-url="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}" data-text="According to Rorschach Test Platform my {{indexname}} index has value {{value|fortmatindex:indexname}}!" data-count="none" data-hashtags="RorschachTestPlatf">Tweet</a>
 		  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></td>
 		  </tr></table>
@@ -116,7 +115,7 @@
               data.addRows(rowFriend);
 
               var options = {
-                width: 600, height: 400,
+                width: 500, height: 400,
                 title: 'Node distribution (over {{nodevalues|length}} buckets)',
                 hAxis: {title: 'Bucket'},
                 vAxis: {title: '# Nodes', logScale: true, format:'#'},
@@ -141,7 +140,7 @@
               
               var options = {
                 title: 'Node gaussian (over {{nodevalues|length}} buckets)',
-            	width: 600, height: 400,
+            	width: 500, height: 400,
             	hAxis: {title: 'Bucket'},
             	vAxis: {title: '# Nodes', format:'#' },
             	seriesType: "bars",
@@ -167,7 +166,6 @@
           <p>&nbsp;</p>
           <table><tr>
           <td><a name="fb_share" type="button" share_url="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}">Share</a>&nbsp;
-          <script src="https://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script></td>
           <td><a href="https://twitter.com/share" class="twitter-share-button" data-url="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}" data-text="According to Rorschach Test Platform my {{indexname}} index has value {{value|fortmatindex:indexname}}!" data-count="none" data-hashtags="RorschachTestPlatf">Tweet</a>
 		  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></td>
 		  </tr></table>
@@ -229,7 +227,7 @@
               data.addRows(rowFriend);
 
               var options = {
-                width: 600, height: 400,
+                width: 500, height: 400,
                 title: 'Edge distribution (over {{edgevalues|length}} buckets)',
                 hAxis: {title: 'Bucket'},
                 vAxis: {title: '# Edges', logScale: true, format:'#'},
@@ -254,7 +252,7 @@
               
               var options = {
                 title: 'Edge gaussian (over {{edgevalues|length}} buckets)',
-            	width: 600, height: 400,
+            	width: 500, height: 400,
             	hAxis: {title: 'Bucket'},
             	vAxis: {title: '# Edges', format:'#' },
             	seriesType: "bars",
@@ -270,7 +268,7 @@
         </script>
       {% endif %}
       
-            {% if not code == None and friends != None and friends|length > 0  %}
+      {% if not code == None and friends != None and friends|length > 0  %}
       <p>&nbsp;</p>
       <p><a id="comparelink" href="#">Compare your index value with one of your friends</a></p>
       
@@ -466,18 +464,6 @@
     
     <section id="normalsection" class="clearfix">
     <p><div class="fb-comments" data-href="{{conf.BASE_URL}}index/{{uid}}/{{indexname}}" data-num-posts="2" data-width="740"></div></p>
-    <script type="text/javascript">
-    <!--
-    var head = $("head").get(0);  // using jquery
-	var script2 = document.createElement("script");
-	if (!$.browser.msie ) {
-	    script2.innerHTML = "window.FB = null;FB=null;";
-	}else{
-	    script2.text = "window.FB = null;FB=null;";
-	}
-	head.appendChild(script2);
-    // -->
-    </script>
     </section>
     
     <script type="text/javascript">

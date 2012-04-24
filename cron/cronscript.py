@@ -1,5 +1,5 @@
 import webapp2
-import cleanup_sessions
+import cleanup_sessions, update_tree_values
 
 class MainPage(webapp2.RequestHandler):
     def renderPage(self, scriptname):

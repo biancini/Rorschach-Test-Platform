@@ -1,5 +1,5 @@
     <header class="clearfix">
-      <p id="picture" style="background-image: url(static/images/macchie.jpg); background-size: 64px 64px"></p>
+      <p id="picture" style="background-image: url(/static/images/macchie.jpg); background-size: 64px 64px"></p>
       <h1>Rorschach Test Platform, welcome <strong>{{me.name}}</strong>!</h1>
       <p class="tagline">
         Navigation
@@ -44,7 +44,7 @@
       <p class="button"><a href="/profile?code={{code}}" class="facebook-button">
         <span class="plus">View or compute your profile</span>
       </a></p>
-      <p><div class="fb-comments" data-href="{{conf.BASE_URL}}profile" data-num-posts="2" data-width="740"></div></p>
+      <p><div class="fb-comments" data-href="{{conf.BASE_URL}}profile/{{me.id}}" data-num-posts="2" data-width="740"></div></p>
     </section>
 
     <section id="normalsection" class="clearfix">

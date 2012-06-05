@@ -3,7 +3,7 @@ cron:
   url: /tech/cron/cleanup_sessions
   schedule: every 24 hours
 
-- description: bi-weekly update tree data sets
+- description: weekly update tree data sets
   url: /tech/cron/update_tree_values
-  schedule: every monday 04:00
+  schedule: every friday 04:00
   

@@ -9,19 +9,19 @@ import datetime
 conf = conf.Config()
 TABWIDTH = 16
 
-cols = [{'order':  1, 'name': 'nodes',          'buckets': ['0-250', '251-500', '501-750', '751-1000', '>1000']  },
-        {'order':  2, 'name': 'density',        'buckets': ['0-2', '2-4', '4-7', '>7']                           },
-        {'order':  3, 'name': 'geodesic',       'buckets': ['<4', '4-6', '6-10', '>10']                          },
-        {'order':  4, 'name': 'fragmentation',  'buckets': ['<10', '10-20', '20-30', '30-40', '>40']             },
-        {'order':  5, 'name': 'diameter',       'buckets': ['<5', '5-8', '8-12', '12-16', '>16']                 },
-        {'order':  6, 'name': 'degree',         'buckets': ['0-2', '2-4', '4-6', '>6']                           },
-        {'order':  7, 'name': 'centralization', 'buckets': ['<7', '7-13', '13-20', '20-30', '>30']               },
-        {'order':  8, 'name': 'closeness',      'buckets': ['<15', '15-30', '30-50', '>50']                      },
-        {'order':  9, 'name': 'eigenvector',    'buckets': ['<2', '2-4', '4-6', '>6']                            },
-        {'order': 10, 'name': 'betweenness',    'buckets': ['0-1', '1-2', '2-3', '>3']                           },
-        {'order': 11, 'name': 'cliques',        'buckets': ['<200', '200-500', '500-800', '>800']                },
-        {'order': 12, 'name': 'comembership',   'buckets': ['0-0.5', '0.5-1', '1-1.5', '1.5-2', '>2']            },
-        {'order': 13, 'name': 'components',     'buckets': ['<4', '4-6', '6-8', '8-10', '>10']                   }]
+cols = [{'order':  1, 'name': 'nodes',          'buckets': ['0-200', '200-300', '300-500', '500-800', '800-1000', '>1000']  },
+        {'order':  2, 'name': 'density',        'buckets': ['0-2', '2-4', '4-8', '8-12', '>12']                             },
+        {'order':  3, 'name': 'geodesic',       'buckets': ['<3', '3-4', '4-6', '6-10', '>10']                              },
+        {'order':  4, 'name': 'fragmentation',  'buckets': ['<10', '10-20', '20-30', '30-40', '>40']                        },
+        {'order':  5, 'name': 'diameter',       'buckets': ['<6', '6', '7', '8', '9', '10', '11', '12', '>12']              },
+        {'order':  6, 'name': 'degree',         'buckets': ['0-2', '2-4', '4-6', '>6']                                      },
+        {'order':  7, 'name': 'centralization', 'buckets': ['<7', '7-13', '13-20', '20-30', '>30']                          },
+        {'order':  8, 'name': 'closeness',      'buckets': ['<15', '15-30', '30-50', '>50']                                 },
+        {'order':  9, 'name': 'eigenvector',    'buckets': ['<2', '2-4', '4-6', '>6']                                       },
+        {'order': 10, 'name': 'betweenness',    'buckets': ['0-1', '1-2', '2-3', '>3']                                      },
+        {'order': 11, 'name': 'cliques',        'buckets': ['<200', '200-500', '500-800', '>800']                           },
+        {'order': 12, 'name': 'comembership',   'buckets': ['0-0.5', '0.5-1', '1-1.5', '1.5-2', '>2']                       },
+        {'order': 13, 'name': 'components',     'buckets': ['0-5', '5-6', '6-8', '8-10', '10-100', '>100']                  }]
 
 dict_cols = dict((item['name'], item['buckets']) for item in cols)
 
@@ -68,7 +68,7 @@ def create_files(all_networks, all_indexes, filesdata):
             if item['name'] in curfile['needed_cols']: strToWrite += "    %s => %s\n" % (item['name'], ' '.join(item['buckets']))
         strToWrite += "\n\n"
     
-        strToWrite += "Training Data:\n\n\n"
+        strToWrite += "Training Data:\n\n"
         strToWrite += ("%-10s\t" * 2) % ('sample', 'class')
         for col in curfile['needed_cols']:
             strToWrite += "%-10s\t" % col
@@ -92,7 +92,7 @@ def create_files(all_networks, all_indexes, filesdata):
             i += 1
             strToWrite += "\n"
     
-        #print strToWrite.expandtabs(TABWIDTH)
+        if conf.DEBUG: print strToWrite.expandtabs(TABWIDTH)
         file_name = 'tree_%s_%s.dat' % (curfile['filename'], datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
         blob_name = files.blobstore.create(mime_type='text/plain', _blobinfo_uploaded_filename=file_name)
         with files.open(blob_name, 'a', exclusive_lock=True) as f:
@@ -106,7 +106,7 @@ def run():
     create_files(all_networks, all_indexes,
                  [{'filename': 'all_data',
                   'classes': ('???'),
-                  'needed_cols': ('nodes', 'density', 'geodesic', 'fragmentation', 'diameter', 'degree', 'centralization' 'closeness', 'eigenvector', 'betweenness', 'cliques', 'comembership', 'components')},
+                  'needed_cols': ('nodes', 'density', 'geodesic', 'fragmentation', 'diameter', 'degree', 'centralization', 'closeness', 'eigenvector', 'betweenness', 'cliques', 'comembership', 'components')},
                   {'filename': 'net_connection',
                   'classes': ('strong', 'loose'),
                   'needed_cols': ('nodes', 'density', 'geodesic', 'diameter', 'components')}])

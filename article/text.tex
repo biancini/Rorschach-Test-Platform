@@ -82,7 +82,7 @@ All the sociological analysis are performed starting from a representation of th
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=\columnwidth]{Fig1fbnetwork.eps}
+\includegraphics[width=8cm]{Fig1fbnetwork.eps}
 \caption{Visualization of a Facebook network}
 \label{fig:FBNetwork}
 \end{figure}
@@ -113,4 +113,111 @@ They can roughly be divided into three sets:
 \item subgroups indexes.
 \end{enumerate}
 
+\subsection{Basic indexes}
+Basic indexes are measures computed on the more direct and visible structural characteristics of the graph.
+They can be easily measured from the graph data (nodes and edges) and produce information on the network as a whole
+(i.e. these indexes do not refer to any speciﬁc node or subset of the network but they refer to the complete network).\\
+\\
+The Rorschach Test Platform computes four of such indexes:
 
+\begin{itemize}
+
+\item \emph{Density}: This index measures the density of the network intended as the number of edges actually present in respect to the total theoretical number of edges.
+The density of the network is the ratio of edges present in the network and the total number of possible edges of the network.
+A network of N nodes can have a maximum of N * (N-1) edges.
+
+The formula for this index is, then, the one presented in \ref{eq:density}.
+
+\begin{equation}
+density(G) = 
+\frac{\left | E \right |}
+{\left | N \right | * \left ( \left | N \right | + 1 \right )}
+\label{eq:density}
+\end{equation}
+
+Facebook networks are usually very sparse, so very low values of this index are expected.
+Typical values can be around .05 or even less.
+
+\item \emph{Geodesic}: In graph theory, the geodesic distance is the smallest path length between two nodes.
+This index, then, measures the average of all the geodetic distances between all connected nodes in the network.\\
+\\
+This value represents the number of connections each node has to contact in order to reach every other node in the network.\\
+\\
+Given the deﬁnition of geodesic distance between two nodes as in \ref{eq:distance},
+
+\begin{equation}
+\begin{split}
+distance(v_{1}, v_{2}) = min\left ( d(v_{1}, v_{k}) + d(v_{k}, v_{2}) \right )
+\textrm{, } \forall v_{k} \in V \\
+\textrm{ where }
+d(v_{i}, v_{j})=\left \{
+\begin{matrix}
+0 \textrm{ if } v_{i} = v_{j} \\
+1 \textrm{ if } v_{i}, v_{j} \in E \\
++\infty \textrm{ otherwise}
+\end{matrix}
+\right.
+\end{split}
+\label{eq:distance}
+\end{equation}
+
+the formula for this index can be expressed as in \ref{eq:geodesic}.
+
+\begin{equation}
+geodesic(G) = \frac{\sum_{v_{1}, v_{2}\in V}{distance(v_{1}, v_{2})}}{\left | E \right |}
+\label{eq:geodesic}
+\end{equation}
+
+This index is lower the more connected the network is. In fact connected networks offer short paths between two randomly choosen nodes.
+Typical values for quite strongly connected Facebook networks are around 4.
+
+\item \emph{Fragmentation}: The fragmentation index shows how much the network is fragmented, that is how many node pairs of the network cannot reach other
+node in the network.
+Thisindex is the ratio of the number of node pairs for which the network does not have a path to connect them.
+Nodes not connected may be isolated nodes or nodes belonging to two non connected subgraphs.\\
+\\
+This index gives an indication about how uniformely the network can be divided.
+Very low values indicates networks that shows very few unconnected subparts.
+Higher values indicate networks in which different components and subparts can be identiﬁed.\\
+\\
+This index can be computed starting from a matrix of geodesic distances between all the nodes.
+This matrix can be computed using the Floyd-Warshall algorithm \cite{Lawler-2001}.
+
+The formula for this index can then be expressed as in \ref{eq:fragmentation}.
+
+\begin{equation}
+\begin{split}
+fragmentation(G) = count(n_{1}, n_{2}) \textrm{, } \forall n_{1}\in V, n_{2} \in V \\
+\textrm{where } distance(n_{1}, n_{2}) = +\infty
+\end{split}
+\label{eq:fragmentation}
+\end{equation}
+
+Usual Facebook values could be quite high, usual social networks have more than one set of nodes (i.e. parents, friends form work, friends from university, ...).
+A typical real value for this index could be around .20.
+
+\item \emph{Diameter}: The diameter of a network is the longest geodesic between two nodes randomly choosen inside the network.
+This index measure the longest path that can be followed inside the network between its nodes without starting a circle.
+The lower this value, the more interconnected the network is.\\
+\\
+This index is computed from the matrix obtained with Floyd-Warshall algorithm which computes the geodesic distance between each pair of nodes in the graph.\\
+\\
+The formula for this index can be expressed as in \ref{eq:diameter}.
+
+\begin{equation}
+\begin{split}
+diameter(G) = max\left ( distance(v_{1}, v_{2}) \right )
+\textrm {, } \forall v_{1} \in V, v_{2} \in V \\
+\textrm{ where }
+distance(v_{1}, v_{2}) \neq  +\infty
+\end{split}
+\label{eq:diameter}
+\end{equation}
+
+Typical values may be around 10. Networks with smaller values are more connected.
+
+\end{itemize}
+
+\subsection{Centrality indexes}
+
+\subsection{Subgroups indexes}

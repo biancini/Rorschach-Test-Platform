@@ -1,3 +1,19 @@
+\begin{abstract}
+In psychology, testing is largely used in order to assess mental constructs, such as cognitive and emotional functioning, of individuals.
+Tests permit researchers to easily reach a large population of subjects.
+Tests introduce also quantitative aspects to the psychological introspection mechanisms.\\
+\\
+To design tests and run them an open source platform is commonly available.
+This platform, called OpenSesame, provides researchers with an advanced and easy to use experiment builder to support their researches.\\
+\\
+This article presents a platform designed to provide additional social information to the tests implemented on the OpenSesame platform.
+The platform presented is able to compute sociological indexes on the Facebook networks of the subjects using SNA techniques.
+These indexes are meant to integrate the data coming from test execution and enrich it with social information about the subjects.\\
+\\
+\emph{Keywords}: Social sciences \and psychological tests \and OpenSesame \and Facebook \and social network analysis \and Software
+\end{abstract}
+
+
 \section{Introduction}
 
 The word psychology literally means, ”the study of the soul”. This gives the idea of the vastity of the ﬁeld of study of psychological sciences: the mind.
@@ -26,23 +42,23 @@ These wide numeric data is often very useful in describing social trends and int
 The main problems in deﬁning, submitting and executing tests in the ﬁeld of social psychology are about these aspects: test creation, test submission and the collection
 of relevant test data.
 To support the ease of test creation, the OpenSesame project (\cite{Matot-2011}) offer a graphical experiment builder for the social sciences.
-OpenSesame is an opensource, high-quality experimental software which is easily able to be used in combination with existing sofware.
+OpenSesame is an opensource experimental software which is easily able to be used in combination with existing sofware.
 The OpenSesame application has been extended to be integrated with a testing platform, presented in this paper, that runs as a Facebook application and collects and compute
 social indexes on the subjects’ networks of contacts.
 With such integration it is possible to achieve a better diffusion of the tests (leveraging Facebook social features) and to enrich test data with relevant social
 information about the subjects (computed on their Facebook networks).
-The platform developed, called Rorschach Test Platform, has the aim to reach these goals.
-This paper will present the platform and explains from a functional and technical point of view the beneﬁts provided by this new tool.\\
+The platform developed, called the Rorschach Test Platform, has the aim to reach these goals.
+This paper will present the platform and explain from a functional and technical point of view the beneﬁts provided by this new tool.\\
 \\
-The rest of this paper is structured as following: in the next section the beneﬁts of using Facebook as a meansof distribution is described.
+The rest of this paper is structured as following: in the next section the beneﬁts of using Facebook as a mean of distribution is described.
 The second section will present social network analysis (SNA) techniques and will describe all the indexes computed within the proposed platform.
-The third section will present the overall functionalities developed in the platform and how they can be used in conjiunction with OpenSesame platform to create and run
-real tests.
+The third section will present the overall functionalities developed in the platform and how they can be used in conjunction with the OpenSesame platform to create
+and run real tests.
 The last section will show conclusions and possible future works on this topic.
-The appendix, at last, will present some detail about the technical design and implementation of the platform.
+The appendix will present some detail about the technical design and implementation of the platform.
 
 \section{Leveraging Facebook social data and means of distribution}
-In recent periods, the advancements in technology and in computer science permit the growth of social medias like Facebook and other social networking paltforms.
+The advancements in technology and in computer science permit the growth of social medias like Facebook and other social networking paltforms.
 These tools, leveraging on modern advancements in computer science technologies, permit to gather and store lots of data about users and their activities.\\
 \\
 Social network sites (SNSs) allow individuals to present themselves, articulate their social networks, and establish or maintain connections with others
@@ -55,7 +71,7 @@ validity of the research.
 It’s however undoubt that a conscious and careful use of these tools could be strongly beneﬁcial in the sociological ﬁeld.\\
 \\
 \paragraph{Objective of this work.}
-This article, starting from the assumptions presented, has the objective to present a platform designed with the aim to give sociological testers new tools and
+This article has the objective to present a platform designed with the aim to give sociological testers new tools and
 information leveraging Facebook as the most successful SNS to date.
 The underlying idea is that, with a smart integration with Facebook, two main beneﬁts can be obtained:
 
@@ -65,7 +81,7 @@ This popularity could permit a tremendous diffusion with a very limited cost.
 This makes very attractive the usage Facebook as a platform to diffuse psychological tests.
 \item On the other side, Facebook is also a very powerful tool able to mock the social life of its participants.
 As in \cite{Lewis-2008}, different datasets of information can be extracted from Facebook and used for sociological studies.
-This could permit to enrich the information coming from the analysis of psychological test answers, and obtain higher levels of insight.
+This could permit researchers to enrich the information coming from the analysis of psychological test answers, and obtain higher levels of insight.
 \end{itemize}
 
 \section{Social network analysis techniques}
@@ -103,7 +119,7 @@ where V is a set of nodes and E a set of edges.
 The graphs representing Facebook networks are undirected graphs (if A is friend of B, B is by deﬁnition friend of A).
 This implies that the elements of E are unordered pairs of elements of V.\\
 \\
-With this deﬁnition we can apply alghoritmic graph theory to study the graph traversal and generation and the complexity of these operations.
+With this deﬁnition we can apply graph theory to study the graph traversal and generation and the complexity of these operations.
 Upon this mathematic deﬁnition, Social Network Analysis is at this point able to compute measures about social connections.
 Different measures can be computed, in the following the measures computed by Rorschach Test Platform will be described.
 They can roughly be divided into three sets:
@@ -118,7 +134,7 @@ Basic indexes are measures computed on the more direct and visible structural ch
 They can be easily measured from the graph data (nodes and edges) and produce information on the network as a whole
 (i.e. these indexes do not refer to any speciﬁc node or subset of the network but they refer to the complete network).\\
 \\
-The Rorschach Test Platform computes four of such indexes:
+The Rorschach Test Platform computes four such indexes:
 
 \begin{itemize}
 

@@ -31,13 +31,90 @@
 
       {% if not nodes == None and not edges == None %}
       <table id="table_nodes"><tr>
+      <td colspan="2">
+        <div id="drawing" style="width: 700px; height: 350px"></div>
+        <div id="json" style="display: none">{% autoescape off %}{{json_network}}{% endautoescape %}</div>
+        <script type="text/javascript">
+        <!--
+		var w = 700,
+    		h = 350,
+    		r = 6,
+    		fill = d3.scale.category20();
+
+        var div = d3.select("body").append("div")
+        	.attr("class", "tooltip")
+        	.style("opacity", 1e-6);
+		
+		var force = d3.layout.force()
+    		.gravity(.4)
+    		.charge(-40)
+    		.size([w, h]);
+		
+		var svg = d3.select("#drawing").append("svg:svg")
+    		.attr("width", w)
+    		.attr("height", h);
+		
+		var json = JSON.parse($('#json').text());
+		var link = svg.selectAll("line")
+			.data(json['links'])
+			.enter().append("svg:line")
+			.attr("class", "link");
+		
+		var node = svg.selectAll("circle")
+    		.data(json['nodes'])
+    		.enter().append("svg:circle")
+      		.attr("r", r - .75)
+      		.style("fill", function(d) { return fill(d.group); })
+      		.style("stroke", function(d) { return d3.rgb(fill(d.group)).darker(); })
+      		.on("mousemove", function(d){mousemove(d);})
+            .on("mouseout", mouseout);
+      		//.call(force.drag);
+		
+		force
+    		.nodes(json['nodes'])
+    		.links(json['links'])
+    		.on("tick", tick)
+    		.start();
+		
+		function tick() {
+  			node.attr("cx", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
+      			.attr("cy", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); });
+
+			link.attr("x1", function(d) { return d.source.x; })
+      			.attr("y1", function(d) { return d.source.y; })
+      			.attr("x2", function(d) { return d.target.x; })
+      			.attr("y2", function(d) { return d.target.y; });
+		}
+		
+		function mouseover() {
+            div.transition()
+                    .duration(300)
+                    .style("opacity", 1);
+	    }
+	
+	    function mousemove(d) {
+			div.html("Node<br>" + d.name)
+			   .style("left", (d3.event.pageX ) + "px")
+			   .style("top", (d3.event.pageY) + "px");
+	    }
+	
+	    function mouseout() {
+			div.transition()
+			   .duration(300)
+			   .style("opacity", 1e-6);
+	    }
+		// -->
+    	</script>
+        
+      </td>
+      </tr><tr>
       <td><div id="network_div"></div></td>
       <td>
         <h3>Your Facebook network nodes (and edges) count:</h3><br/>&nbsp;
         <span id="indexvalue">{{nodes|length}} <small>({{edges|length}})</small></span>
         <p>&nbsp;</p>
         <table><tr>
-        <td><a name="fb_share" type="button" share_url="{{conf.BASE_URL}}network/{{uid}}">Share</a>&nbsp;</td>
+        <td><fb:share-button type="button"></fb:share-button>&nbsp;</td>
         <td><a href="https://twitter.com/share" class="twitter-share-button" data-url="{{conf.BASE_URL}}network/{{uid}}" data-text="According to Rorschach Test Platform my Facebook network has {{nodes|length}} nodes and {{edges|length}} edges!" data-count="none" data-hashtags="RorschachTestPlatf">Tweet</a>
         <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script></td>
 	    </tr></table>

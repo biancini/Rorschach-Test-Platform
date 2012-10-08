@@ -118,6 +118,14 @@ class MainPage(webapp2.RequestHandler):
                 for row in league:
                     row[1] = re.sub("\w", "x", row[1]).title()
                 hiddenleague = True
+                
+            json_network = {}
+            json_network['nodes'] = []
+            json_network['links'] = []
+            for node in nodes:
+                json_network['nodes'].append({'name': node, 'group':1})
+            for edge in edges:
+                json_network['links'].append({'source': nodes.index(edge[0]), 'target': nodes.index(edge[1]), 'value':1})
         
         if session == None:
             app_friends = None
@@ -138,6 +146,7 @@ class MainPage(webapp2.RequestHandler):
             'friends': app_friends,
             'isdesktop': session and session['isdesktop'] or False,
             'header': 'network',
+            'json_network': json.dumps(json_network),
             'code': code }
 
         root = os.path.normpath(os.path.join(os.path.dirname(__file__), os.path.pardir))

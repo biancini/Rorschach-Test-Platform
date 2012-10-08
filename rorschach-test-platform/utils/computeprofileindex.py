@@ -174,17 +174,31 @@ def getNodesEdges(self, session):
         "SELECT uid2 FROM friend WHERE uid1 = me()",
         session['access_token'])
     nodes = []
+    edges = []
+
+    #for node in result:
+    #    nodes.append(node['uid2'])
+    #
+    #result = fbutils.fql(
+    #    "SELECT uid1, uid2 FROM friend WHERE " +
+    #    "uid1 IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND " +
+    #    "uid2 IN (SELECT uid1 FROM friend WHERE uid2 = me())",
+    #    session['access_token']);
+    #
+    #if 'error_code' in result and result['error_code'] > 0:
+    #    logging.warning("Error during Facebook call: " + result['error_msg'])
+    #else:
+    #    for edge in result:
+    #        edges.append([edge['uid1'], edge['uid2']])
+    
     for node in result:
         nodes.append(node['uid2'])
-
-    result = fbutils.fql(
-        "SELECT uid1, uid2 FROM friend WHERE " +
-        "uid1 IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND " +
-        "uid2 IN (SELECT uid1 FROM friend WHERE uid2 = me())",
-        session['access_token']);
-    edges = []
-    for edge in result:
-        edges.append([edge['uid1'], edge['uid2']])
+        result = fbutils.fb_call('me/mutualfriends/' + node['uid2'], {'access_token' : session['access_token']})
+        
+        if 'data' in result:
+            for curedge in result['data']:
+                edges.append([node['uid2'], curedge['id']])
+        
     
     return nodes, edges
 

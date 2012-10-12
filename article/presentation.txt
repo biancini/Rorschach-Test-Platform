@@ -1,3 +1,0 @@
-The author is graduated in Computer Science and is studying for a second graduation on psychology.
-These two interests and areas of application, suggested him possible researches joining technical and social aspects of modern psychology.
-This paper aims to present a platform developed during such researches and is intended to provide useful software tools for the research community.

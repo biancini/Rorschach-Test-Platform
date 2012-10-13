@@ -3,7 +3,7 @@ import logging
 import simplejson as json
 import datetime
 import libsna, conf, fbutils, sessionmanager
-import urlparse, hashlib, gc
+import urlparse, gc
 
 from obj import obj_index
 from google.appengine.ext import db
@@ -19,24 +19,12 @@ def getLibSNA(self, session):
     uid = self.request.get('id', None)
     if uid == None: uid = self.request.get('uid', None)
     
-    if uid: network = libsna.getusernetwork(uid)
-    else: network = libsna.getusernetwork(uid)
+    network = libsna.getusernetwork(uid)
     libSNA = libsna.SocialNetwork()
     
-    lastMonth = datetime.datetime.today() - datetime.timedelta(30)
-    if network.updated_time <  lastMonth or network.getnodes() == None or network.getedges() == None:
-        logging.info("Reading network from Facebook.")
-        nodes, edges = getNodesEdges(self, session)
-        libSNA.loadGraph(nodes=nodes, edges=edges)
-
-        h = hashlib.sha1()
-        h.update("%s - %s" % (libSNA.graph.nodes(), libSNA.graph.edges()))
-        
-        network.networkhash = h.hexdigest()
-        network.setnodes(str(nodes))
-        network.setedges(str(edges))
-        network.setleague(None)
-        network.put()
+    if network.getnodes() == None or network.getedges() == None:
+        logging.info("No network stored in database.")
+        return None
     else:
         libSNA.loadGraph(nodes=network.getnodes(), edges=network.getedges())
     
@@ -61,6 +49,12 @@ def computeIndex(self, libSNA, indexname, backend, session, saveInDatastore=True
     objreturn = {}
     uid = self.request.get('id', None)
     if uid == None: uid = self.request.get('uid', None)
+    
+    if libSNA == None:
+        objreturn['error'] = True
+        objreturn['msg'] = 'You need to get you network statistics before you can compute any sociological index.'
+        objreturn['value'] = ''
+        return objreturn
     
     indexes = cache.get("%s_indexes" % uid)
     if indexes == None:
@@ -168,39 +162,6 @@ def base_url(self):
     else:
         baseurl = "%s://%s:%s/" % (url.scheme, url.hostname, url.port)
     return baseurl
-
-def getNodesEdges(self, session):
-    result = fbutils.fql(
-        "SELECT uid2 FROM friend WHERE uid1 = me()",
-        session['access_token'])
-    nodes = []
-    edges = []
-
-    #for node in result:
-    #    nodes.append(node['uid2'])
-    #
-    #result = fbutils.fql(
-    #    "SELECT uid1, uid2 FROM friend WHERE " +
-    #    "uid1 IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND " +
-    #    "uid2 IN (SELECT uid1 FROM friend WHERE uid2 = me())",
-    #    session['access_token']);
-    #
-    #if 'error_code' in result and result['error_code'] > 0:
-    #    logging.warning("Error during Facebook call: " + result['error_msg'])
-    #else:
-    #    for edge in result:
-    #        edges.append([edge['uid1'], edge['uid2']])
-    
-    for node in result:
-        nodes.append(node['uid2'])
-        result = fbutils.fb_call('me/mutualfriends/' + node['uid2'], {'access_token' : session['access_token']})
-        
-        if 'data' in result:
-            for curedge in result['data']:
-                edges.append([node['uid2'], curedge['id']])
-        
-    
-    return nodes, edges
 
 def postResults(self, session, params):
     uid = self.request.get('id', None)

@@ -104,6 +104,10 @@ class MainPage(webapp2.RequestHandler):
                 network = network[0]
                 cache.add("%s_network" % uid, network, 60*60)
 
+        json_network = {}
+        json_network['nodes'] = []
+        json_network['links'] = []
+            
         if network:
             nodes = network.getnodes()
             edges = network.getedges()
@@ -119,13 +123,12 @@ class MainPage(webapp2.RequestHandler):
                     row[1] = re.sub("\w", "x", row[1]).title()
                 hiddenleague = True
                 
-            json_network = {}
-            json_network['nodes'] = []
-            json_network['links'] = []
-            for node in nodes:
-                json_network['nodes'].append({'name': node, 'group':1})
-            for edge in edges:
-                json_network['links'].append({'source': nodes.index(edge[0]), 'target': nodes.index(edge[1]), 'value':1})
+            if nodes:
+                for node in nodes:
+                    json_network['nodes'].append({'name': node, 'group':1})
+            if edges:
+                for edge in edges:
+                    json_network['links'].append({'source': nodes.index(edge[0]), 'target': nodes.index(edge[1]), 'value':1})
         
         if session == None:
             app_friends = None

@@ -3,7 +3,7 @@ import webapp2
 from pages import home, robots, profile, sociologicalindex, network
 from pages import pagetab, smallgraph, postwall
 from admin import admin, viewcreatetest, viewtestresults, vieweditnetwork, vieweditindex, downloadnetwork, downloadindex
-from utils import conf, computeprofileindex, networkleague, printnetwork
+from utils import conf, storenetwork, computeprofileindex, networkleague, printnetwork
 from opensesame import access, config, indexes, testfile
 
 conf = conf.Config()
@@ -42,6 +42,7 @@ routes.append(('/opensesame/indexes', indexes.MainPage))
 routes.append(('/opensesame/testfile', testfile.MainPage))
 
 # Adding routes for technical pages for perform operations
+routes.append(('/storenetwork', storenetwork.MainPage))
 routes.append(('/computeprofileindex', computeprofileindex.MainPage))
 routes.append(('/networkleague', networkleague.MainPage))
 routes.append(('/network.(\w+)', printnetwork.MainPage))

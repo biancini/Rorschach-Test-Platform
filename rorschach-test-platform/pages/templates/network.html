@@ -16,14 +16,90 @@
     </header>
     
     <section id="normalsection" class="clearfix">
-      {% if not code == None %}
-        <h2>Network for user: {{uid}} (generate network file: <a href="/network.gdf?uid={{uid}}&code={{ code }}">GDF</a> or <a href="/network.graphml?uid={{uid}}&code={{ code }}">graphml</a>)
-        <a href="#" onclick="post_wall()" class="facebook-button" style="float: right">
-          <span class="plus">Post your network data on your profile</span>
-        </a></h2>
+      {% if not code == None and not nodes == None and not edges == None %}
+        <h2 id="title_network">Network for user: {{uid}} (generate network file: <a href="/network.gdf?uid={{uid}}&code={{ code }}">GDF</a> or <a href="/network.graphml?uid={{uid}}&code={{ code }}">graphml</a>)
+        <ul><li><a href="#" onclick="computeNetworkStatistics()" class="facebook-button" style="float: right; margin: left: 8px">
+          <span class="plus">Compute network statistics</span>
+        </a></li>
+        <li><a href="#" onclick="post_wall()" class="facebook-button" style="float: right; margin: left: 8px">
+          <span class="plus">Post your network to Wall</span>
+        </a></li></ul></h2>
       {% else %}
-        <h2>Network for user: {{uid}}</h2>
+        <h2>Network for user: {{uid}}
+        <a href="#" onclick="computeNetworkStatistics()" class="facebook-button" style="float: right">
+          <span class="plus">Compute network statistics</span>
+        </a></h2>
       {% endif %}
+      
+      <div id="computation"></div>
+      
+      <script type="text/javascript">
+      <!--
+        window.fbAsyncInit = function() {
+		  FB.init({
+		    appId      : {{conf.FBAPI_APP_ID}}, // App ID
+		    channelUrl : '/static/pages/channel.html', // Channel File
+		    status     : true, // check login status
+		    cookie     : true, // enable cookies to allow the server to access the session
+		    xfbml      : true  // parse XFBML
+		  });
+		};
+		
+		function computeNetworkStatistics() {
+			//FB.login();
+			FB.api('/me/friends', {fields: 'id'}, function(response) {
+			  if (response.error) {
+				  $("#computation").text('Error occured while connecting to Facebook: ' + response.error);
+			  } else {
+				var nodes = [];
+				var edges = [];
+				var numEdges = 0;
+				var totEdges = 0;
+				
+			    for (var i = 0, l = response.data.length; i < l; i++) {
+			      totEdges = l;
+			      var friend = response.data[i];
+			      nodes.push(friend.id);
+			      FB.api('/me/mutualfriends/' + friend.id, {fields: 'id'}, function(response) {
+			    	  if (!response.error) {
+			    		  $("#computation").text("Downloading friends information: " + (numEdges+1) + "/" + totEdges + " ...");
+			    		  for (var i = 0, l = response.data.length; i < l; i++) {
+			    			  edges.push([friend.id, response.data[i].id]);
+			    		  }
+			    	  }
+			    	  numEdges++;
+			    	  
+			    	  if (numEdges == totEdges) {
+			      		computedStatistics(nodes, edges);
+			      		$("#computation").text();
+			          }
+			      });
+			    }
+			  }
+			});
+		}
+		
+	    function computedStatistics(nodes, edges) {
+	      $.ajax({
+	        type : 'POST',
+	        url : '/storenetwork',
+	        dataType : 'json',
+	        data: {
+	          code: '{{code}}',
+	          id : '{{uid}}',
+	          nodes: JSON.stringify(nodes),
+	          edges: JSON.stringify(edges)
+	        },
+	        success : function(data){
+	          window.location.reload();
+	        },
+	        error : function(XMLHttpRequest, textStatus, errorThrown) {
+	          $('#computation').text("Error while sending network data to Rorschach Test Platform.");
+	        }
+	      });
+		}
+      //-->
+	  </script>
     </section>
     
     <section id="normalsection" class="clearfix">
@@ -161,9 +237,6 @@
         }
       // -->
       </script>
-      {% else %}
-      <p>At least one index value must be calculated in order to have the network computed and visible here.</p>
-      {% endif %}
     
       {% if not code == None and friends != None and friends|length > 0  %}
       <p>&nbsp;</p>
@@ -425,9 +498,10 @@
 		  </script>
           {% endif %}
 	    </p>
-	    {% else %}
-        <p>At least one index value must be calculated in order to have the network computed and visible here.</p>
 	    {% endif %}
+      {% else %}
+      <p>You have to compute your network statistics in order to have the network computed and visible here.</p>
+      {% endif %}
     </section>
     
     <section id="normalsection" class="clearfix">

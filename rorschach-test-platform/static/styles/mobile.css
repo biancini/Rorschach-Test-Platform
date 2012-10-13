@@ -101,6 +101,16 @@ header .tagline span:before {
   margin-left: 8px;
 }
 
+#title_network ul {
+  float: right;
+}
+
+#title_network li {
+  float: left;
+  list-style: none;
+  margin-left: 8px;
+}
+
 .facebook-button:link, .facebook-button:visited {
   background-color: #eee;
   background-image: -moz-linear-gradient(top, #fdfdfd, #eaebeb);

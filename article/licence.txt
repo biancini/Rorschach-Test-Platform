@@ -1,1 +1,0 @@
-Social psychology testing platform leveraging Facebook and SNA techniques by Biancini 2012 is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.

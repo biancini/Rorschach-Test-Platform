@@ -108,77 +108,43 @@
       {% if not nodes == None and not edges == None %}
       <table id="table_nodes"><tr>
       <td colspan="2">
-        <div id="drawing" style="width: 700px; height: 350px"></div>
+        <div class="span12 sigma-parent" id="sigma-example-parent">
+			<div class="sigma-expand" id="sigma-example"></div>
+		</div>
         <div id="json" style="display: none">{% autoescape off %}{{json_network}}{% endautoescape %}</div>
         <script type="text/javascript">
         <!--
-		var w = 700,
-    		h = 350,
-    		r = 6,
-    		fill = d3.scale.category20();
-
-        var div = d3.select("body").append("div")
-        	.attr("class", "tooltip")
-        	.style("opacity", 1e-6);
-		
-		var force = d3.layout.force()
-    		.gravity(.4)
-    		.charge(-40)
-    		.size([w, h]);
-		
-		var svg = d3.select("#drawing").append("svg:svg")
-    		.attr("width", w)
-    		.attr("height", h);
-		
-		var json = JSON.parse($('#json').text());
-		var link = svg.selectAll("line")
-			.data(json['links'])
-			.enter().append("svg:line")
-			.attr("class", "link");
-		
-		var node = svg.selectAll("circle")
-    		.data(json['nodes'])
-    		.enter().append("svg:circle")
-      		.attr("r", r - .75)
-      		.style("fill", function(d) { return fill(d.group); })
-      		.style("stroke", function(d) { return d3.rgb(fill(d.group)).darker(); })
-      		.on("mousemove", function(d){mousemove(d);})
-            .on("mouseout", mouseout);
-      		//.call(force.drag);
-		
-		force
-    		.nodes(json['nodes'])
-    		.links(json['links'])
-    		.on("tick", tick)
-    		.start();
-		
-		function tick() {
-  			node.attr("cx", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
-      			.attr("cy", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); });
-
-			link.attr("x1", function(d) { return d.source.x; })
-      			.attr("y1", function(d) { return d.source.y; })
-      			.attr("x2", function(d) { return d.target.x; })
-      			.attr("y2", function(d) { return d.target.y; });
-		}
-		
-		function mouseover() {
-            div.transition()
-                    .duration(300)
-                    .style("opacity", 1);
-	    }
-	
-	    function mousemove(d) {
-			div.html("Node<br>" + d.name)
-			   .style("left", (d3.event.pageX ) + "px")
-			   .style("top", (d3.event.pageY) + "px");
-	    }
-	
-	    function mouseout() {
-			div.transition()
-			   .duration(300)
-			   .style("opacity", 1e-6);
-	    }
+          var sigInst = sigma.init(document.getElementById('sigma-example')).drawingProperties({
+			defaultLabelColor: '#fff',
+			defaultLabelSize: 14,
+			defaultLabelBGColor: '#fff',
+			defaultLabelHoverColor: '#000',
+			labelThreshold: 6,
+			defaultEdgeType: 'curve',
+			edgeColor: '#BBBBBB'
+		  }).graphProperties({
+			minNodeSize: 0.5,
+			maxNodeSize: 5,
+			minEdgeSize: 2,
+			maxEdgeSize: 2
+		  }).mouseProperties({
+			maxRatio: 32
+		  });
+		  
+		  var obj = jQuery.parseJSON($('#json').text());
+		  for(var i = 0; i < obj.nodes.length; i++) {
+			sigInst.addNode(obj.nodes[i].name, {'label': obj.nodes[i].name, 'x': Math.random(), 'y': Math.random(), 'color': '#3B5998'});
+		  }
+		  
+		  for(var i = 0; i < obj.links.length; i++) {
+			sigInst.addEdge(obj.nodes[obj.links[i].source].name + "-" + obj.nodes[obj.links[i].target].name, obj.nodes[obj.links[i].source].name, obj.nodes[obj.links[i].target].name);
+		  }
+		  
+		  sigInst.startForceAtlas2();
+		  setTimeout(function(){
+			sigInst.stopForceAtlas2();
+			sigInst.draw();
+	      }, 5000);
 		// -->
     	</script>
         

@@ -133,11 +133,13 @@
 		  
 		  var obj = jQuery.parseJSON($('#json').text());
 		  for(var i = 0; i < obj.nodes.length; i++) {
-			sigInst.addNode(obj.nodes[i].name, {'label': obj.nodes[i].name, 'x': Math.random(), 'y': Math.random(), 'color': '#3B5998'});
+			  try { sigInst.addNode(obj.nodes[i].name, {'label': obj.nodes[i].name, 'x': Math.random(), 'y': Math.random(), 'color': '#3B5998'}); }
+			  catch(err) { /* Do Nothing */ }
 		  }
 		  
 		  for(var i = 0; i < obj.links.length; i++) {
-			sigInst.addEdge(obj.nodes[obj.links[i].source].name + "-" + obj.nodes[obj.links[i].target].name, obj.nodes[obj.links[i].source].name, obj.nodes[obj.links[i].target].name);
+			try { sigInst.addEdge(obj.nodes[obj.links[i].source].name + "-" + obj.nodes[obj.links[i].target].name, obj.nodes[obj.links[i].source].name, obj.nodes[obj.links[i].target].name); }
+			catch(err) { /* Do Nothing */ }
 		  }
 		  
 		  sigInst.startForceAtlas2();

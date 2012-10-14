@@ -46,7 +46,6 @@
 		};
 		
 		function computeNetworkStatistics() {
-			//FB.login();
 			FB.api('/me/friends', {fields: 'id'}, function(response) {
 			  if (response.error) {
 				  $("#computation").text('Error occured while connecting to Facebook: ' + response.error);
@@ -60,20 +59,22 @@
 			      totEdges = l;
 			      var friend = response.data[i];
 			      nodes.push(friend.id);
-			      FB.api('/me/mutualfriends/' + friend.id, {fields: 'id'}, function(response) {
-			    	  if (!response.error) {
-			    		  $("#computation").text("Downloading friends information: " + (numEdges+1) + "/" + totEdges + " ...");
-			    		  for (var i = 0, l = response.data.length; i < l; i++) {
-			    			  edges.push([friend.id, response.data[i].id]);
-			    		  }
+			      FB.api('/me/mutualfriends/' + friend.id, {fields: 'id'}, (function(curId) {
+			    	  return function(response) {
+				    	  if (!response.error) {
+				    		  $("#computation").text("Downloading friends information: " + (numEdges+1) + "/" + totEdges + " ...");
+				    		  for (var i = 0, l = response.data.length; i < l; i++) {
+				    			  edges.push([curId, response.data[i].id]);
+				    		  }
+				    	  }
+				    	  numEdges++;
+				    	  
+				    	  if (numEdges == totEdges) {
+				      		computedStatistics(nodes, edges);
+				      		$("#computation").text();
+				          }
 			    	  }
-			    	  numEdges++;
-			    	  
-			    	  if (numEdges == totEdges) {
-			      		computedStatistics(nodes, edges);
-			      		$("#computation").text();
-			          }
-			      });
+			      }(friend.id)));
 			    }
 			  }
 			});

@@ -113,29 +113,45 @@
 			<div class="sigma-expand" id="sigma-example"></div>
 		</div>
         <div id="json" style="display: none">{% autoescape off %}{{json_network}}{% endautoescape %}</div>
+        <a href="#" onclick="startStopLayout()" class="facebook-button">
+          <span id="stop-layout" class="plus">Stop Layout</span>
+        </a>
         <script type="text/javascript">
         <!--
           var sigInst = sigma.init(document.getElementById('sigma-example')).drawingProperties({
-			defaultLabelColor: '#fff',
-			defaultLabelSize: 14,
-			defaultLabelBGColor: '#fff',
 			defaultLabelHoverColor: '#000',
-			labelThreshold: 6,
+			labelThreshold: 100,
 			defaultEdgeType: 'curve',
-			edgeColor: '#BBBBBB'
+			edgeColor: '#eeeeee',
+			adjustSizes: true
 		  }).graphProperties({
-			minNodeSize: 0.5,
+			minNodeSize: 5,
 			maxNodeSize: 5,
-			minEdgeSize: 2,
-			maxEdgeSize: 2
+			minEdgeSize: 0.5,
+			maxEdgeSize: 1
 		  }).mouseProperties({
 			maxRatio: 32
 		  });
 		  
-		  var obj = jQuery.parseJSON($('#json').text());
+          var obj = jQuery.parseJSON($('#json').text());
+		  var degrees = new Array();
+		  var maxDegree = 0;
+		  var degreeColors = ['#CED5E5', '#9DACCB', '#6C82B1', '#3B5998'];
+		  var isRunning = true; 
+		  
+		  for(var i = 0; i < obj.links.length; i++) {
+		    var curDegree = degrees[obj.nodes[obj.links[i].source].name];
+			if (curDegree === undefined) degrees[obj.nodes[obj.links[i].source].name] = 1;
+			else degrees[obj.nodes[obj.links[i].source].name] += 1;
+			
+			if (degrees[obj.nodes[obj.links[i].source].name] > maxDegree) maxDegree = degrees[obj.nodes[obj.links[i].source].name];
+		  }
+		  
 		  for(var i = 0; i < obj.nodes.length; i++) {
-			  try { sigInst.addNode(obj.nodes[i].name, {'label': obj.nodes[i].name, 'x': Math.random(), 'y': Math.random(), 'color': '#3B5998'}); }
-			  catch(err) { /* Do Nothing */ }
+			try {
+				var color = Math.round(4 * degrees[obj.nodes[i].name] / maxDegree);
+				sigInst.addNode(obj.nodes[i].name, {'label': obj.nodes[i].name, 'x': Math.random(), 'y': Math.random(), 'color': degreeColors[color]}); }
+			catch(err) { /* Do Nothing */ }
 		  }
 		  
 		  for(var i = 0; i < obj.links.length; i++) {
@@ -144,10 +160,23 @@
 		  }
 		  
 		  sigInst.startForceAtlas2();
-		  setTimeout(function(){
-			sigInst.stopForceAtlas2();
-			sigInst.draw();
-	      }, 5000);
+		  //setTimeout(function(){
+		  //  sigInst.stopForceAtlas2();
+		  //  sigInst.draw();
+	      //}, 5000);
+        
+        
+          function startStopLayout() {
+            if (isRunning) {
+              isRunning = false;
+              sigInst.stopForceAtlas2();
+              $('#stop-layout').text('Start Layout');
+            } else {
+        	  isRunning = true;
+        	  sigInst.startForceAtlas2();
+        	  $('#stop-layout').text('Stop Layout');
+            }
+          }
 		// -->
     	</script>
         

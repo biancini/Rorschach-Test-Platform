@@ -1,7 +1,7 @@
 .project
 .pydevproject
 .settings
-utils/fbappid_dev.py
-utils/fbappid_prod.py
+rorschach-test-platform/utils/fbappid_dev.py
+rorschach-test-platform/utils/fbappid_prod.py
 *.pyc
 *.po

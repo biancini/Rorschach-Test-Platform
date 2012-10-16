@@ -19,9 +19,6 @@ class MainPage(webapp2.RequestHandler):
         objreturn['message'] = 'Wrong session'
         
         if session:
-            indexes = {}
-            for index in conf.INDEXES.keys(): indexes[index] = "<null>"
-            
             indexes = cache.get("%s_indexes" % session['me']['id'])
             if indexes == None:
                 indexes = {}
@@ -41,6 +38,9 @@ class MainPage(webapp2.RequestHandler):
             for index in indexes.values():
                 if not index.networkhash == None and not index.value == None:
                     indexes[index.name] = (conf.INDEX_TYPES[index.name]) % index.value
+            
+            for index in conf.INDEXES.keys():
+                if not index in indexes: indexes[index] = "<null>"
             
             SERVER_ADDRESS = ('127.0.0.1', 33333)
             
@@ -69,7 +69,77 @@ class MainPage(webapp2.RequestHandler):
             self.response.out.write('<section id="normalsection" class="clearfix">')
             self.response.out.write('<h3>Index values to be submitted to the OpenSesame test</h3>')
             self.response.out.write('<p>The test you are about to take wants to download the values of some index computed on Rorschach Test Platform.</p>')
-            self.response.out.write('<p>To proceed you have to verify that all needed indexes are computed for your profile, and then click on the "Save index values" button below.<br/>&nbsp;</p>') 
+            self.response.out.write('<p>To proceed you have to verify that all needed indexes are computed for your profile, and then click on the "Save index values" button below.</p>')
+            self.response.out.write('<p>If you haven\'t done already, you can compute your network statistics <a href="#" onclick="computeNetworkStatistics()">here</a>.</p>')
+            self.response.out.write('<p><div id="computation"></div><br/>&nbsp;</p>')
+      
+            self.response.out.write('<script type="text/javascript">\n')
+            self.response.out.write('<!--\n')
+            self.response.out.write('  window.fbAsyncInit = function() {')
+            self.response.out.write('    FB.init({\n')
+            self.response.out.write('      appId      : ' + conf.FBAPI_APP_ID + ', // App ID\n');
+            self.response.out.write('      channelUrl : "/static/pages/channel.html", // Channel File\n');
+            self.response.out.write('      status     : true, // check login status\n');
+            self.response.out.write('      cookie     : true, // enable cookies to allow the server to access the session\n');
+            self.response.out.write('      xfbml      : true  // parse XFBML\n');
+            self.response.out.write('    });\n');
+            self.response.out.write('  };\n');
+            self.response.out.write('  function computeNetworkStatistics() {\n');
+            self.response.out.write('      FB.api("/me/friends", {fields: "id"}, function(response) {\n');
+            self.response.out.write('        if (response.error) {\n');
+            self.response.out.write('            $("#computation").text("Error occured while connecting to Facebook: " + response.error);\n');
+            self.response.out.write('        } else {\n');
+            self.response.out.write('          var nodes = [];\n');
+            self.response.out.write('          var edges = [];\n');
+            self.response.out.write('          var numEdges = 0;\n');
+            self.response.out.write('          var totEdges = 0;\n');
+            self.response.out.write('          for (var i = 0, l = response.data.length; i < l; i++) {\n');
+            self.response.out.write('            totEdges = l;\n');
+            self.response.out.write('            var friend = response.data[i];\n');
+            self.response.out.write('            nodes.push(friend.id);\n');
+            self.response.out.write('            FB.api("/me/mutualfriends/" + friend.id, {fields: "id"}, (function(curId) {\n');
+            self.response.out.write('                return function(response) {\n');
+            self.response.out.write('                  if (!response.error) {\n');
+            self.response.out.write('                      $("#computation").text("Downloading friends information: " + (numEdges+1) + "/" + totEdges + " ...");\n');
+            self.response.out.write('                      for (var i = 0, l = response.data.length; i < l; i++) {\n');
+            self.response.out.write('                          edges.push([curId, response.data[i].id]);\n');
+            self.response.out.write('                      }\n');
+            self.response.out.write('                  }\n');
+            self.response.out.write('                  numEdges++;\n');
+            self.response.out.write('                  if (numEdges == totEdges) {\n');
+            self.response.out.write('                    computedStatistics(nodes, edges);\n');
+            self.response.out.write('                    $("#computation").text();\n');
+            self.response.out.write('                  }\n');
+            self.response.out.write('                }\n');
+            self.response.out.write('            }(friend.id)));\n');
+            self.response.out.write('          }\n');
+            self.response.out.write('        }\n');
+            self.response.out.write('      });\n');
+            self.response.out.write('    }\n');
+            self.response.out.write('    function computedStatistics(nodes, edges) {\n');
+            self.response.out.write('      $.ajax({\n');
+            self.response.out.write('        type : "POST",\n');
+            self.response.out.write('        url : "/storenetwork",\n');
+            self.response.out.write('        dataType : "json",\n');
+            self.response.out.write('        data: {\n');
+            self.response.out.write('          access_token: "' + access_token + '",\n');
+            self.response.out.write('          id : "' + session['me']['id'] + '",\n');
+            self.response.out.write('          nodes: JSON.stringify(nodes),\n');
+            self.response.out.write('          edges: JSON.stringify(edges)\n');
+            self.response.out.write('        },\n');
+            self.response.out.write('        success : function(data){\n');
+            self.response.out.write('          window.location.reload();\n');
+            self.response.out.write('        },\n');
+            self.response.out.write('        error : function(XMLHttpRequest, textStatus, errorThrown) {\n');
+            self.response.out.write('          $("#computation").text("Error while sending network data to Rorschach Test Platform.");\n');
+            self.response.out.write('        }\n');
+            self.response.out.write('      });\n');
+            self.response.out.write('  }\n');
+            self.response.out.write('//-->\n')
+            self.response.out.write('</script>')
+            
+            
+             
             self.response.out.write('<form action="http://%s:%s/" method="post" name="valueSubmit" id="valueSubmit">' % SERVER_ADDRESS)
             
             self.response.out.write('<table width="800px" style="border: 1px solid black">')

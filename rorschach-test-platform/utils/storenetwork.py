@@ -14,6 +14,8 @@ class MainPage(webapp2.RequestHandler):
         uid = self.request.get('id', None)
         if uid == None: uid = self.request.get('uid', None)
         session = sessionmanager.getsession(self, access_token=self.request.get('access_token', None))
+        if session: access_token = session['access_token']
+        else: access_token = self.request.get('access_token', '') 
         
         nodes = json.loads(self.request.get('nodes', None))
         edges = json.loads(self.request.get('edges', None))
@@ -39,7 +41,7 @@ class MainPage(webapp2.RequestHandler):
             taskqueue.add(url='/networkleague', params={'id': uid,
                                                     'backend': True,
                                                     'code': self.request.get('code', None),
-                                                    'access_token': session['access_token']},
+                                                    'access_token': access_token},
                       queue_name='indexes-queue', method='POST', target='backend-indexes')
 
     def get(self):

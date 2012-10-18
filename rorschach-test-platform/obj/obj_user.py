@@ -8,6 +8,8 @@ class User(db.Model):
     link = db.StringProperty()
     username = db.StringProperty()
     updated_time = db.DateTimeProperty(auto_now_add=True)
+    admin = db.BooleanProperty(default=False)
+    tech = db.BooleanProperty(default=False)
     
     def stroutput(self):
         return "User element with:\n \
@@ -16,5 +18,7 @@ class User(db.Model):
                 last_name = " + (self.last_name or '<null>') + "\n \
                 link = " + (self.link or '<null>') + "\n \
                 username = " + (self.username or '<null>') + "\n \
-                updated_time = " + str(self.updated_time or '<null>') + "\n"
+                updated_time = " + str(self.updated_time or '<null>') + "\n \
+                admin = " + str(self.admin) + "\n \
+                tech = " + str(self.tech) + "\n"
 

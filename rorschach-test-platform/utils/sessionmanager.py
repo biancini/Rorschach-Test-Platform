@@ -2,8 +2,11 @@ import logging
 import re
 
 from utils import fbutils, conf
+from google.appengine.ext import db
 from gaesessions import get_current_session
+from google.appengine.api import memcache
 
+cache = memcache.Client()
 conf = conf.Config()
 RE_MOBILE = re.compile(r"(iphone|ipod|blackberry|android|palm|windows\s+ce)", re.I)
 
@@ -44,8 +47,6 @@ def getsession(self, access_token=None, redirect_uri=None):
             if 'error' in appid: raise Exception(appid['error'['message']])
             app_token = fbutils.fbapi_get_application_access_token(self, redirect_uri)
             if 'error' in app_token: raise Exception(app_token['error'['message']])
-            roles = fbutils.get_user_roles(app_token, me['id'])
-            if 'error' in roles: raise Exception(roles['error'['message']])
             
             session['access_token'] = access_token
             session['me'] = me
@@ -53,14 +54,26 @@ def getsession(self, access_token=None, redirect_uri=None):
             session['app_token'] = app_token
             session['isdesktop'] = isDesktop(self.request)
             
-            session['roles'] = ['user']
-            if 'administrators' in (roles or []) or 'insights' in (roles or []):
-                session['roles'].append('administrator')
-            if 'administrators' in (roles or []):
-                session['roles'].append('technician')    
+            users = cache.get("users")
+            if users == None:
+                users = []
+                q = db.GqlQuery("SELECT * FROM User")
+                for user in q: users.append(user)
+                cache.add("users", users)
             
+            curuser = None
+            for user in users:
+                if user.uid == session['me']['id']: curuser = user
+            
+            session['roles'] = ['user']
+            if curuser.admin:
+                session['roles'].append('administrator')
+            if curuser.tech:
+                session['roles'].append('technician')
+                
             session.save()
-    except:
+    except Exception, e:
+        logging.error("Error while creating session " + str(e))
         session.terminate()
         return None
     

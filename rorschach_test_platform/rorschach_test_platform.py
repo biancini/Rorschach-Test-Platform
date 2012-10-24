@@ -261,11 +261,11 @@ class qtrorschach_test_platform(rorschach_test_platform, qtplugin.qtplugin):
         
     def apply_edit_changes(self):
         """Apply the controls"""
-        if not qtplugin.qtplugin.apply_edit_changes(self, False) or self.lock:
+        if qtplugin.qtplugin.apply_edit_changes(self, False) == False or self.lock:
             return False
         
         if self.testlist.count() > 1:
-            self.set('associated_test', self.experiment.usanitize(self.testlist.currentText()))
+            self.set('associated_test', str(self.experiment.usanitize(unicode(self.testlist.currentText()))))
         
         indexes = []
         if self.has('indexes_check'):
@@ -283,7 +283,7 @@ class qtrorschach_test_platform(rorschach_test_platform, qtplugin.qtplugin):
         self.lock = True
         
         if self.has('associated_test'):
-            self.testlist.setCurrentIndex(self.testlist.findText(self.experiment.unsanitize(self.get('associated_test'))))
+            self.testlist.setCurrentIndex(self.testlist.findText(self.experiment.unsanitize(str(self.get('associated_test')))))
         
         if self.has('indexes'):
             if self.has('indexes_check'):

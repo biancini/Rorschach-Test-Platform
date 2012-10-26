@@ -261,7 +261,7 @@ class qtrorschach_test_platform(rorschach_test_platform, qtplugin.qtplugin):
         
     def apply_edit_changes(self):
         """Apply the controls"""
-        if qtplugin.qtplugin.apply_edit_changes(self, False) == False or self.lock:
+        if not qtplugin.qtplugin.apply_edit_changes(self, False) or self.lock:
             return False
         
         if self.testlist.count() > 1:

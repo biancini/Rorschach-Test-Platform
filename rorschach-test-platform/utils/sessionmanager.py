@@ -26,11 +26,12 @@ def isDesktop(request):
 def getsession(self, access_token=None, redirect_uri=None):
     session = get_current_session()
     
-    #try:
     try:
+        if not access_token and session and 'access_token' in session: access_token = session['access_token']
         if not access_token: access_token = fbutils.fbapi_auth(self, self.request.get('code'), redirect_uri)[0]
         fbutils.fb_call('me', args={'access_token': access_token})
-    except:
+    except Exception, e:
+        logging.error("Wrong session, terminating it.\nAccess: " + str(access_token) + "\nError: " + str(e))
         session.terminate()
         return None
     
@@ -66,9 +67,9 @@ def getsession(self, access_token=None, redirect_uri=None):
                 if user.uid == session['me']['id']: curuser = user
             
             session['roles'] = ['user']
-            if curuser.admin:
+            if curuser and curuser.admin:
                 session['roles'].append('administrator')
-            if curuser.tech:
+            if curuser and curuser.tech:
                 session['roles'].append('technician')
                 
             session.save()

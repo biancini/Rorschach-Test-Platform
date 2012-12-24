@@ -63,6 +63,7 @@ def fbapi_auth(self, code, redirect_uri=None):
     result = fbapi_get_string(path=u"/oauth/access_token?", params=params,
                               encode_func=simple_dict_serialisation)
     
+    #logging.info("Result for call to retrieve Access Token " + str(result))
     pairs = result.split("&", 1)
     result_dict = {}
     for pair in pairs:

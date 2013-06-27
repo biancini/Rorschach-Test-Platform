@@ -1,6 +1,6 @@
 import webapp2
 
-from pages import home, robots, google, profile, sociologicalindex, network
+from pages import home, robots, googlepage, profile, sociologicalindex, network
 from pages import pagetab, smallgraph, postwall
 from admin import admin, viewcreatetest, viewtestresults, vieweditnetwork, vieweditindex, downloadnetwork, downloadindex
 from utils import conf, storenetwork, computeprofileindex, networkleague, printnetwork
@@ -13,7 +13,7 @@ routes = []
 # Adding routes for pages rendering screens to the user
 routes.append(('/', home.MainPage));
 routes.append(('/robots.txt', robots.MainPage))
-routes.append(('/google154d786375f402f2.html', google.MainPage))
+routes.append(('/google154d786375f402f2.html', googlepage.MainPage))
 routes.append(('/profile', profile.MainPage))
 routes.append(('/profile/(\w+)', profile.MainPage))
 routes.append(('/pagetab', pagetab.MainPage))
